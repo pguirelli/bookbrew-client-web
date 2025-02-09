@@ -40,7 +40,7 @@ export const Login = () => {
   });
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
       <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 400 }}>
         <Typography variant="h5" component="h1" sx={{ mb: 3, textAlign: 'center' }}>
           BookBrew Login
@@ -91,6 +91,19 @@ export const Login = () => {
           </Link>
         </Box>
       </Paper>
+
+      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 400, mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#e0e0e0' }}>
+        <Typography variant="body1" color="#666">
+          Ainda não tem usuário?
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => navigate('/register-customer')}
+        >
+          Cadastre-se
+        </Button>
+      </Paper>
+
     </Box>
   );
 };
