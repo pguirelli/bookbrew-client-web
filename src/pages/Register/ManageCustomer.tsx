@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
+import React, { useState } from "react";
+import {
+  Box,
   Paper,
   Button,
   TextField,
-  Typography, 
+  Typography,
   Grid,
   Table,
   TableBody,
@@ -14,12 +14,12 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  TableSortLabel
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useFormik } from 'formik';
-import * as yup from 'yup';
+  TableSortLabel,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useFormik } from "formik";
+import * as yup from "yup";
 
 interface CustomerType {
   id: number;
@@ -54,36 +54,39 @@ interface AddressType {
   complement: string;
 }
 
-type Order = 'asc' | 'desc';
+type Order = "asc" | "desc";
 
 const validationSchema = yup.object({
-  firstName: yup.string().required('Nome é obrigatório'),
-  lastName: yup.string().required('Sobrenome é obrigatório'),
-  email: yup.string().email('Email inválido').required('Email é obrigatório'),
-  cpf: yup.string().required('CPF é obrigatório'),
-  phone: yup.string().required('Telefone é obrigatório'),
-  birthDate: yup.date().required('Data de nascimento é obrigatória'),
-  addresses: yup.array().of(
-    yup.object({
-      zipCode: yup.string().required('CEP é obrigatório'),
-      street: yup.string().required('Rua é obrigatória'),
-      number: yup.string().required('Número é obrigatório'),
-      neighborhood: yup.string().required('Bairro é obrigatório'),
-      type: yup.string().required('Tipo é obrigatório'),
-      city: yup.string().required('Cidade é obrigatória'),
-      state: yup.string().required('Estado é obrigatório'),
-      country: yup.string().required('País é obrigatório'),
-      complement: yup.string()
-    })
-  ).min(1, 'Adicione pelo menos um endereço')
+  firstName: yup.string().required("Nome é obrigatório"),
+  lastName: yup.string().required("Sobrenome é obrigatório"),
+  email: yup.string().email("Email inválido").required("Email é obrigatório"),
+  cpf: yup.string().required("CPF é obrigatório"),
+  phone: yup.string().required("Telefone é obrigatório"),
+  birthDate: yup.date().required("Data de nascimento é obrigatória"),
+  addresses: yup
+    .array()
+    .of(
+      yup.object({
+        zipCode: yup.string().required("CEP é obrigatório"),
+        street: yup.string().required("Rua é obrigatória"),
+        number: yup.string().required("Número é obrigatório"),
+        neighborhood: yup.string().required("Bairro é obrigatório"),
+        type: yup.string().required("Tipo é obrigatório"),
+        city: yup.string().required("Cidade é obrigatória"),
+        state: yup.string().required("Estado é obrigatório"),
+        country: yup.string().required("País é obrigatório"),
+        complement: yup.string(),
+      })
+    )
+    .min(1, "Adicione pelo menos um endereço"),
 });
 
 export const ManageCustomer = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [customers, setCustomers] = useState<CustomerType[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [order, setOrder] = useState<Order>('asc');
-  const [orderBy, setOrderBy] = useState<keyof CustomerType>('firstName');
+  const [order, setOrder] = useState<Order>("asc");
+  const [orderBy, setOrderBy] = useState<keyof CustomerType>("firstName");
 
   // Add pagination states
   const [page, setPage] = useState(0);
@@ -94,33 +97,34 @@ export const ManageCustomer = () => {
     setPage(newPage);
   };
 
-const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setRowsPerPage(parseInt(event.target.value, 10));
-  setPage(0);
-};
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
-const handleRequestSort = (property: keyof CustomerType) => {
-  const isAsc = orderBy === property && order === 'asc';
-  setOrder(isAsc ? 'desc' : 'asc');
-  setOrderBy(property);
-};
+  const handleRequestSort = (property: keyof CustomerType) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
 
-    const filteredAndSortedCustomers = React.useMemo(() => {
-      return [...customers]
-        .filter(customer => 
-          Object.values(customer).some(value => 
-            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-          )
+  const filteredAndSortedCustomers = React.useMemo(() => {
+    return [...customers]
+      .filter((customer) =>
+        Object.values(customer).some((value) =>
+          value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
-        .sort((a, b) => {
-          if (order === 'asc') {
-            return a[orderBy] < b[orderBy] ? -1 : 1;
-          } else {
-            return b[orderBy] < a[orderBy] ? -1 : 1;
-          }
-        });
-    }, [customers, order, orderBy, searchTerm]);
-
+      )
+      .sort((a, b) => {
+        if (order === "asc") {
+          return a[orderBy] < b[orderBy] ? -1 : 1;
+        } else {
+          return b[orderBy] < a[orderBy] ? -1 : 1;
+        }
+      });
+  }, [customers, order, orderBy, searchTerm]);
 
   const formik = useFormik<{
     firstName: string;
@@ -132,19 +136,19 @@ const handleRequestSort = (property: keyof CustomerType) => {
     addresses: AddressType[];
   }>({
     initialValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      cpf: '',
-      phone: '',
-      birthDate: '',
-      addresses: []
+      firstName: "",
+      lastName: "",
+      email: "",
+      cpf: "",
+      phone: "",
+      birthDate: "",
+      addresses: [],
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
         if (editingId) {
-          const updatedCustomers = customers.map(customer => 
+          const updatedCustomers = customers.map((customer) =>
             customer.id === editingId ? { ...values, id: editingId } : customer
           );
           setCustomers(updatedCustomers);
@@ -154,7 +158,7 @@ const handleRequestSort = (property: keyof CustomerType) => {
         }
         formik.resetForm();
       } catch (error) {
-        console.error('Operation error:', error);
+        console.error("Operation error:", error);
       }
     },
   });
@@ -168,20 +172,26 @@ const handleRequestSort = (property: keyof CustomerType) => {
       cpf: customer.cpf,
       phone: customer.phone,
       birthDate: customer.birthDate,
-      addresses: customer.addresses
+      addresses: customer.addresses,
     });
   };
-  
 
   const handleDelete = (customerId: number) => {
-    setCustomers(customers.filter(customer => customer.id !== customerId));
+    setCustomers(customers.filter((customer) => customer.id !== customerId));
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
-      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 800, margin: '0 auto' }}>
-        <Typography variant="h5" component="h1" sx={{ mb: 3, textAlign: 'center' }}>
-          {editingId ? 'Editar Cliente' : 'Cadastro de Cliente'}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
+      >
+        <Typography
+          variant="h5"
+          component="h1"
+          sx={{ mb: 3, textAlign: "center" }}
+        >
+          {editingId ? "Editar Cliente" : "Cadastro de Cliente"}
         </Typography>
 
         <form onSubmit={formik.handleSubmit}>
@@ -194,7 +204,9 @@ const handleRequestSort = (property: keyof CustomerType) => {
                 label="Nome"
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
-                error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                error={
+                  formik.touched.firstName && Boolean(formik.errors.firstName)
+                }
                 helperText={formik.touched.firstName && formik.errors.firstName}
               />
             </Grid>
@@ -206,7 +218,9 @@ const handleRequestSort = (property: keyof CustomerType) => {
                 label="Sobrenome"
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
-                error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                error={
+                  formik.touched.lastName && Boolean(formik.errors.lastName)
+                }
                 helperText={formik.touched.lastName && formik.errors.lastName}
               />
             </Grid>
@@ -256,29 +270,34 @@ const handleRequestSort = (property: keyof CustomerType) => {
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.birthDate}
                 onChange={formik.handleChange}
-                error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+                error={
+                  formik.touched.birthDate && Boolean(formik.errors.birthDate)
+                }
                 helperText={formik.touched.birthDate && formik.errors.birthDate}
               />
             </Grid>
             <Grid item xs={12}>
-              <Button 
-                fullWidth 
-                variant="contained" 
-                type="submit" 
+              <Button
+                fullWidth
+                variant="contained"
+                type="submit"
                 sx={{ mt: 3 }}
               >
-                {editingId ? 'Atualizar' : 'Cadastrar'}
+                {editingId ? "Atualizar" : "Cadastrar"}
               </Button>
             </Grid>
           </Grid>
         </form>
       </Paper>
 
-      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 800, margin: '0 auto' }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
+      >
         <Typography variant="h6" component="h2" sx={{ mb: 3 }}>
           Clientes Cadastrados
         </Typography>
-        
+
         <TextField
           fullWidth
           id="search"
@@ -288,16 +307,16 @@ const handleRequestSort = (property: keyof CustomerType) => {
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{ mb: 2 }}
         />
-        
+
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>
-                <TableSortLabel
-                    active={orderBy === 'firstName'}
-                    direction={orderBy === 'firstName' ? order : 'asc'}
-                    onClick={() => handleRequestSort('firstName')}
+                  <TableSortLabel
+                    active={orderBy === "firstName"}
+                    direction={orderBy === "firstName" ? order : "asc"}
+                    onClick={() => handleRequestSort("firstName")}
                   >
                     Nome
                   </TableSortLabel>
@@ -311,38 +330,40 @@ const handleRequestSort = (property: keyof CustomerType) => {
               </TableRow>
             </TableHead>
             <TableBody>
-                  {filteredAndSortedCustomers
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell>{`${customer.firstName} ${customer.lastName}`}</TableCell>
-                  <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.cpf}</TableCell>
-                  <TableCell>{customer.phone}</TableCell>
-                  <TableCell>{customer.birthDate}</TableCell>
-                  <TableCell>{customer.addresses.length} endereço(s)</TableCell>
-                  <TableCell align="right">
-                    <IconButton onClick={() => handleEdit(customer)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(customer.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredAndSortedCustomers
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell>{`${customer.firstName} ${customer.lastName}`}</TableCell>
+                    <TableCell>{customer.email}</TableCell>
+                    <TableCell>{customer.cpf}</TableCell>
+                    <TableCell>{customer.phone}</TableCell>
+                    <TableCell>{customer.birthDate}</TableCell>
+                    <TableCell>
+                      {customer.addresses.length} endereço(s)
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton onClick={() => handleEdit(customer)}>
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(customer.id)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
           <TablePagination
-              rowsPerPageOptions={[10, 20]}
-              component="div"
-              count={filteredAndSortedCustomers.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              labelRowsPerPage="Registros por página"
-            />
+            rowsPerPageOptions={[10, 20]}
+            component="div"
+            count={filteredAndSortedCustomers.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Registros por página"
+          />
         </TableContainer>
       </Paper>
     </Box>
