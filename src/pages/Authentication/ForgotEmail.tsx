@@ -1,30 +1,40 @@
-import React, { useState } from 'react';
-import { Box, Paper, TextField, Button, Typography } from '@mui/material';
-import { useFormik } from 'formik';
-import * as yup from 'yup';
-import { authService } from '../../services/auth.service.ts';
+import React, { useState } from "react";
+import { Box, Paper, TextField, Button, Typography } from "@mui/material";
+import { useFormik } from "formik";
+import * as yup from "yup";
+import { authService } from "../../services/auth.service.ts";
 
-const validationSchema = yup.object({
-  cpf: yup.string()
-    .matches(/^\d{11}$/, 'CPF deve ter 11 dígitos')
-    .nullable(), // CPF is optional
-  phoneNumber: yup.string()
-    .matches(/^\d{10,11}$/, 'Telefone deve ter 10 ou 11 dígitos')
-    .nullable(), // Phone number is optional
-}).test('at-least-one', 'Por favor, preencha pelo menos um campo: CPF ou Telefone.', function (value) {
-  const { cpf, phoneNumber } = value || {};
-  if (!cpf && !phoneNumber) {
-    return this.createError({ message: 'Por favor, preencha pelo menos um campo: CPF ou Telefone.' });
-  }
-  return true; // Return true if at least one field is filled
-});
+const validationSchema = yup
+  .object({
+    cpf: yup
+      .string()
+      .matches(/^\d{11}$/, "CPF deve ter 11 dígitos")
+      .nullable(), // CPF is optional
+    phoneNumber: yup
+      .string()
+      .matches(/^\d{10,11}$/, "Telefone deve ter 10 ou 11 dígitos")
+      .nullable(), // Phone number is optional
+  })
+  .test(
+    "at-least-one",
+    "Por favor, preencha pelo menos um campo: CPF ou Telefone.",
+    function (value) {
+      const { cpf, phoneNumber } = value || {};
+      if (!cpf && !phoneNumber) {
+        return this.createError({
+          message: "Por favor, preencha pelo menos um campo: CPF ou Telefone.",
+        });
+      }
+      return true; // Return true if at least one field is filled
+    }
+  );
 
 export const ForgotEmail = () => {
   const [recoveredEmail, setRecoveredEmail] = useState<string | null>(null); // State to store the recovered email
   const formik = useFormik({
     initialValues: {
-      cpf: '',
-      phoneNumber: '',
+      cpf: "",
+      phoneNumber: "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -38,12 +48,23 @@ export const ForgotEmail = () => {
   });
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 400 }}>
-        <Typography variant="h5" component="h1" sx={{ mb: 3, textAlign: 'center' }}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
+    >
+      <Paper elevation={3} sx={{ p: 4, width: "100%", maxWidth: 400 }}>
+        <Typography
+          variant="h5"
+          component="h1"
+          sx={{ mb: 3, textAlign: "center" }}
+        >
           Recuperar Email
         </Typography>
-        
+
         <form onSubmit={formik.handleSubmit}>
           <TextField
             fullWidth
@@ -57,7 +78,7 @@ export const ForgotEmail = () => {
             error={formik.touched.cpf && Boolean(formik.errors.cpf)}
             helperText={formik.touched.cpf && formik.errors.cpf}
           />
-          
+
           <TextField
             fullWidth
             id="phoneNumber"
@@ -67,14 +88,16 @@ export const ForgotEmail = () => {
             value={formik.values.phoneNumber}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+            error={
+              formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)
+            }
             helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
           />
-          
-          <Button 
-            fullWidth 
-            variant="contained" 
-            type="submit" 
+
+          <Button
+            fullWidth
+            variant="contained"
+            type="submit"
             sx={{ mt: 3 }}
             disabled={!formik.isValid || !formik.dirty} // Disable button if form is invalid or not dirty
           >
@@ -83,7 +106,15 @@ export const ForgotEmail = () => {
 
           {/* Display the recovered email if it exists */}
           {recoveredEmail && (
-            <Box sx={{ mt: 3, textAlign: 'center', p: 2, backgroundColor: '#e0f7fa', borderRadius: 1 }}>
+            <Box
+              sx={{
+                mt: 3,
+                textAlign: "center",
+                p: 2,
+                backgroundColor: "#e0f7fa",
+                borderRadius: 1,
+              }}
+            >
               <Typography variant="h6">Email Recuperado:</Typography>
               <Typography variant="body1">{recoveredEmail}</Typography>
             </Box>
@@ -91,7 +122,7 @@ export const ForgotEmail = () => {
 
           {/* Display a general error message if both fields are empty */}
           {formik.errors.cpf && formik.errors.phoneNumber && (
-            <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+            <Typography color="error" sx={{ mt: 2, textAlign: "center" }}>
               {formik.errors.cpf}
             </Typography>
           )}
