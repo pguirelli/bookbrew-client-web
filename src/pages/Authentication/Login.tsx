@@ -4,13 +4,16 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/auth.service.ts";
+import { useAuthContext } from "../../contexts/AuthContext.tsx";
 
 const validationSchema = yup.object({
-  email: yup.string().email("Email inválido").required("Email é obrigatório"),
-  password: yup.string().required("Senha é obrigatória"),
+  email: yup.string().email("E-mail inválido").required("Informe seu e-mail"),
+  password: yup.string().required("Informe sua senha"),
 });
 
 export const Login = () => {
+  const { login } = useAuthContext();
+
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -22,19 +25,33 @@ export const Login = () => {
     onSubmit: async (values) => {
       try {
         const response = await authService.login(values);
-        console.log("Login response:", response);
-        // Handle successful login (store token, redirect, etc)
-
-        // Check if login was successful and redirect
         if (response.cpf) {
-          //localStorage.setItem('token', response.data.token); // Store token
-          navigate("/success"); // Redirect to success page
-        } else {
-          alert("Login não efetuado. Verifique suas credenciais."); // Show error popup
+          const userData = {
+            id: response.id,
+            name: response.name,
+            lastName: response.lastName,
+            email: response.email,
+            cpf: response.cpf,
+            phone: response.phone,
+            status: response.status,
+            profile: {
+              id: response.profile.id,
+              name: response.profile.name,
+              status: response.profile.status,
+            }
+          };
+          login(userData);
+          navigate("/");
         }
       } catch (error) {
-        // Handle error
         console.error("Login error:", error);
+        if (error.response?.status === 400) {
+          formik.setStatus("E-mail ou senha incorretos");
+        } else {
+          formik.setStatus(
+            "O site encontrou um erro ao realizar login.\n\n Aguarde alguns minutos e tente novamente!"
+          );
+        }
       }
     },
   });
@@ -58,12 +75,26 @@ export const Login = () => {
           BookBrew Login
         </Typography>
 
+        {formik.status && (
+          <pre
+            style={{
+              color: "#d32f2f",
+              fontSize: "0.75rem",
+              fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+              textAlign: "center",
+              marginBottom: "10px",
+            }}
+          >
+            {formik.status}
+          </pre>
+        )}
+
         <form onSubmit={formik.handleSubmit}>
           <TextField
             fullWidth
             id="email"
             name="email"
-            label="Email"
+            label="E-mail"
             margin="normal"
             value={formik.values.email}
             onChange={formik.handleChange}
@@ -93,7 +124,7 @@ export const Login = () => {
           <Link href="/forgot-password" sx={{ display: "block", mb: 1 }}>
             Esqueci minha senha
           </Link>
-          <Link href="/forgot-email">Esqueci meu email</Link>
+          <Link href="/forgot-email">Esqueci meu e-mail</Link>
         </Box>
       </Paper>
 

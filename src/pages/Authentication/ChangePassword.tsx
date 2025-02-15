@@ -1,21 +1,44 @@
-import React from "react";
-import { Box, Paper, TextField, Button, Typography, Grid } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Grid,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth.service.ts";
+import { useAuth } from "../../hooks/useAuth.ts";
 
 const validationSchema = yup.object({
-  currentPassword: yup.string().required("Senha atual é obrigatória"),
+  currentPassword: yup.string().required("Informe a senha atual"),
   newPassword: yup
     .string()
     .min(6, "A nova senha deve ter no mínimo 6 caracteres")
-    .required("Nova senha é obrigatória"),
+    .required("Informe a nova senha"),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref("newPassword")], "As senhas devem ser iguais")
-    .required("Confirmação de senha é obrigatória"),
+    .required("Confirme a nova senha"),
 });
 
 export const ChangePassword = () => {
+  const navigate = useNavigate();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const { getUserId } = useAuth();
+  const userId = getUserId();
+
+  useEffect(() => {
+    if (!userId) {
+      navigate("/login");
+    }
+  }, [userId, navigate]);
+
   const formik = useFormik({
     initialValues: {
       currentPassword: "",
@@ -25,11 +48,29 @@ export const ChangePassword = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        // Add your password change API call here
-        console.log("Form values:", values);
-        formik.resetForm();
+        if (!userId) {
+          navigate("/login");
+          return;
+        }
+
+        await authService.changePassword(userId, {
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
+          confirmPassword: values.confirmPassword,
+        });
+
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          navigate("/login");
+        }, 5000);
       } catch (error) {
         console.error("Password change error:", error);
+        formik.setStatus(
+          "Erro no processo de alteração de senha.\n\n Verifique se a senha atual está correta e tente novamente.\n"
+        );
       }
     },
   });
@@ -53,6 +94,20 @@ export const ChangePassword = () => {
           Alterar Senha
         </Typography>
 
+        {formik.status && (
+          <pre
+            style={{
+              color: "#d32f2f",
+              fontSize: "0.75rem",
+              fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+              textAlign: "center",
+              marginBottom: "10px",
+            }}
+          >
+            {formik.status}
+          </pre>
+        )}
+        <br></br>
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -124,6 +179,17 @@ export const ChangePassword = () => {
           </Grid>
         </form>
       </Paper>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" elevation={6} variant="filled">
+          Senha alterada com sucesso! Você será redirecionado para o login em 5
+          segundos.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

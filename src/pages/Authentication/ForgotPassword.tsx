@@ -3,17 +3,20 @@ import { Box, Paper, TextField, Button, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { authService } from "../../services/auth.service.ts";
+import { useNavigate } from "react-router-dom";
 
 const validationSchema = yup.object({
-  email: yup.string().email("Email inválido").required("Email é obrigatório"),
+  email: yup.string().email("E-mail inválido").required("Informe o e-mail"),
   cpf: yup
     .string()
     .matches(/^\d{11}$/, "CPF deve ter 11 dígitos")
-    .required("CPF é obrigatório"),
+    .required("Informe o CPF"),
 });
 
 export const ForgotPassword = () => {
-  const [token, setToken] = useState<string | null>(null); // State to store the token
+  const navigate = useNavigate();
+
+  const [token, setToken] = useState<string | null>(null);
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -21,15 +24,17 @@ export const ForgotPassword = () => {
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
+      setToken(null);
+      formik.setStatus(null);
       try {
         const response = await authService.forgotPassword(values);
         setToken(response.token);
         console.log("ForgotPassword response:", response);
-        // Handle success (show message, redirect, etc)
       } catch (error) {
-        // Handle error
-        alert("Erro ao recuperar senha.");
-        console.error("Login error:", error);
+        console.error("Error:", error);
+        formik.setStatus(
+          "Erro ao recuperar senha.\n\n Verifique os dados informados para geração do token!"
+        );
       }
     },
   });
@@ -52,12 +57,26 @@ export const ForgotPassword = () => {
           Recuperar Senha
         </Typography>
 
+        {formik.status && (
+          <pre
+            style={{
+              color: "#d32f2f",
+              fontSize: "0.75rem",
+              fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+              textAlign: "center",
+              marginBottom: "10px",
+            }}
+          >
+            {formik.status}
+          </pre>
+        )}
+
         <form onSubmit={formik.handleSubmit}>
           <TextField
             fullWidth
             id="email"
             name="email"
-            label="Email"
+            label="E-mail"
             margin="normal"
             value={formik.values.email}
             onChange={formik.handleChange}
@@ -95,6 +114,15 @@ export const ForgotPassword = () => {
           >
             <Typography variant="h6">Token de Recuperação:</Typography>
             <Typography variant="body1">{token}</Typography>
+
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => navigate("/reset-password")}
+              sx={{ mt: 3 }}
+            >
+              Alterar Senha
+            </Button>
           </Box>
         )}
       </Paper>

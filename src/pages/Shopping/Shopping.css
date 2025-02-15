@@ -1,0 +1,36 @@
+.product-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.product-list li {
+  border: 1px solid #ccc;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.product-list h2 {
+  margin: 0 0 10px;
+}
+
+.product-list p {
+  margin: 5px 0;
+}
+
+.product-list img {
+  max-width: 100px;
+  height: auto;
+}
+
+.product-card {
+  border: 1px solid #ccc;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.product-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 8px;
+}
