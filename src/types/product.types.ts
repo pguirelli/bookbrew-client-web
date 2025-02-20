@@ -49,5 +49,5 @@ export interface ProductImagesSearchDTO {
   id: number;
   description: string;
   image: string;
-  idProduct: number;
+  productId: number;
 }

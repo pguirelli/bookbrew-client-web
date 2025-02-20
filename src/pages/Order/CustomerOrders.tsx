@@ -1,9 +1,8 @@
 import {
-  Edit as EditIcon,
+  Delete as DeleteIcon,
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
   LocalShipping as ShippingIcon,
-  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import {
   Box,
@@ -12,6 +11,7 @@ import {
   CardContent,
   Chip,
   Collapse,
+  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,113 +21,132 @@ import {
   IconButton,
   List,
   ListItem,
+  ListItemSecondaryAction,
   ListItemText,
   Paper,
+  TableCell,
+  TableRow,
   TextField,
   Typography,
-  ListItemSecondaryAction,
 } from "@mui/material";
-import React, { useState } from "react";
-
-interface OrderItem {
-  productId: number;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-  subtotal: number;
-}
-
-interface Order {
-  id: number;
-  orderDate: string;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  items: OrderItem[];
-  paymentMethod: string;
-  paymentDetails: {
-    cardNumber?: string;
-    cardHolder?: string;
-    installments?: number;
-    pixCode?: string;
-    boletoCode?: string;
-  };
-  shippingAddress: {
-    street: string;
-    number: string;
-    complement: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  trackingCode?: string;
-  total: number;
-  discount: number;
-  notes: string;
-}
+import { CheckCircle, Home, Package, Truck } from "lucide-react"; // Verifique se essa importação está correta
+import React, { useEffect, useState } from "react";
+import { useAuthContext } from "../../contexts/AuthContext.tsx";
+import { Footer } from "../../pages/Components/Footer.tsx";
+import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
+import { customerService } from "../../services/customer.service.ts";
+import { orderService } from "../../services/order.service.ts";
+import { Address, Customer } from "../../types/customer.types.ts";
+import {
+  OrderDTO,
+  OrderItemDTO,
+  OrderRequestDTO,
+} from "../../types/order.types.ts";
 
 export const CustomerOrders = () => {
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 1,
-      orderDate: "2024-02-20",
-      status: "processing",
-      items: [
-        {
-          productId: 1,
-          productName: "Livro 1",
-          quantity: 2,
-          unitPrice: 29.9,
-          subtotal: 59.8,
-        },
-      ],
-      paymentMethod: "credit",
-      paymentDetails: {
-        cardNumber: "1111 1111 1111 1111",
-        cardHolder: "1111",
-        installments: 1,
-        pixCode: "pix code",
-        boletoCode: "boleto code",
-      },
-      shippingAddress: {
-        street: "Rua Exemplo",
-        number: "121",
-        complement: "Casa",
-        neighborhood: "Centro",
-        city: "São Paulo",
-        state: "SP",
-        zipCode: "38400-000",
-      },
-      trackingCode: "tracking",
-      total: 59.8,
-      discount: 0,
-      notes: "notes",
-    },
-    // Add more sample orders
-  ]);
+  const [address, setAddress] = useState<Address>();
+  const [orders, setOrders] = useState<OrderDTO[]>([]);
+  const [customer, setCustomer] = useState<Customer>();
+  const { isAuthenticated, user, logout } = useAuthContext();
+  const [expandedTracking, setExpandedTracking] = useState<number | null>(null);
 
-  // Add this component for payment details display
-  const PaymentDetails = ({ order }: { order: Order }) => {
-    switch (order.paymentMethod) {
-      case "credit":
-      case "debit":
+  const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderDTO | null>(null);
+  const [cancellationReason, setCancellationReason] = useState("");
+
+  useEffect(() => {
+    const loadCustomer = async () => {
+      try {
+        if (user?.id) {
+          const customerData = await customerService.getCustomerByUserId(
+            user.id
+          );
+          setCustomer(customerData);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar customer:", error);
+      }
+    };
+    loadCustomer();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        if (customer?.id) {
+          const customerOrders = await orderService.getOrdersByCustomer(
+            customer.id
+          );
+          setOrders(customerOrders);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar pedidos:", error);
+      }
+    };
+
+    if (customer) {
+      fetchOrders();
+    }
+  }, [customer]);
+
+  useEffect(() => {
+    const loadAddress = async () => {
+      if (customer?.id && selectedOrder?.addressId) {
+        console.log("customerAddress:", customer);
+        console.log("selectedOrder:", selectedOrder.addressId);
+
+        const addressData = await customerService.getCustomerAddressById(
+          customer.id,
+          selectedOrder.addressId
+        );
+        setAddress(addressData);
+      }
+    };
+
+    console.log("address:", address);
+
+    if (customer && selectedOrder) {
+      loadAddress();
+    }
+
+    console.log("address2:", address);
+  }, [customer, selectedOrder]);
+
+  const handleTrackOrder = (order: OrderDTO) => {
+    if (order.id) {
+      setExpandedTracking(expandedTracking === order.id ? null : order.id);
+    }
+  };
+
+  const PaymentDetails = ({ order }: { order: OrderDTO }) => {
+    switch (order.payment.paymentMethod) {
+      case "CRÉDITO":
         return (
           <Box>
             <Typography variant="subtitle2" gutterBottom>
               Detalhes do Cartão
             </Typography>
-            <Typography>
-              Número: **** **** ****{" "}
-              {order.paymentDetails.cardNumber?.slice(-4)}
-            </Typography>
-            <Typography>Titular: {order.paymentDetails.cardHolder}</Typography>
-            {order.paymentMethod === "credit" && (
-              <Typography>
-                Parcelas: {order.paymentDetails.installments}x
-              </Typography>
-            )}
+            <Typography>Número: 56** **** **** **34</Typography>
+            <Typography>Titular: {customer?.name?.toUpperCase()}</Typography>
+            <Typography>Parcelas: 6x</Typography>
           </Box>
         );
-      case "pix":
+      case "DÉBITO":
+        return (
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Detalhes do Cartão
+            </Typography>
+            <Typography>Número: 54** **** **** **99</Typography>
+            <Typography>
+              Titular:{" "}
+              {(customer?.name + " " + customer?.lastName).toUpperCase()}
+            </Typography>
+            <Typography>À VISTA</Typography>
+          </Box>
+        );
+      case "PIX":
         return (
           <Box>
             <Typography variant="subtitle2" gutterBottom>
@@ -136,19 +155,37 @@ export const CustomerOrders = () => {
             <TextField
               fullWidth
               label="Código PIX"
-              value={order.paymentDetails.pixCode}
+              value="00020126410014BR.GOV.BCB.PIX01140014123e4567-e12b-12d1-a456-42665544000052040000530398654041.505802BR5913BookBrew6009SAO PAULO62070503***6304A4F8"
               InputProps={{ readOnly: true }}
               size="small"
               multiline
             />
           </Box>
         );
-      case "boleto":
+      case "BOLETO":
         return (
           <Box>
             <Typography variant="subtitle2" gutterBottom>
               Boleto
             </Typography>
+            <TextField
+              fullWidth
+              label="Código PIX"
+              value="00020126410014BR.GOV.BCB.PIX01140014123e4567-e12b-12d1-a456-42665544000052040000530398654041.505802BR5913BookBrew6009SAO PAULO62070503***6304A4F8"
+              InputProps={{ readOnly: true }}
+              size="small"
+              multiline
+            />
+            <Typography>
+              Chave de acesso: 3125 0240 6339 9000 0110 5500 1000 0097 8416 1228
+              5425
+            </Typography>
+            <Typography>Beneficiário: BOOK BREW LTDA</Typography>
+            <Typography>
+              Pagador:{" "}
+              {(customer?.name + " " + customer?.lastName).toUpperCase()}
+            </Typography>
+            <Typography>Valor do documento: {order.amount}</Typography>
             <Button variant="outlined" size="small">
               Visualizar Boleto
             </Button>
@@ -159,23 +196,44 @@ export const CustomerOrders = () => {
     }
   };
 
-  const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [cancellationReason, setCancellationReason] = useState("");
+  const handleExpandOrder = async (order: OrderDTO) => {
+    try {
+      console.log("order.id:", order.id);
+      console.log("customer.id:", customer?.id);
+      if (customer?.id && order.id) {
+        const addressData = await customerService.getCustomerAddressById(
+          customer.id,
+          order.addressId
+        );
+        console.log("addressData:", addressData);
+        setAddress(addressData);
 
-  const handleExpandOrder = (orderId: number) => {
-    setExpandedOrder(expandedOrder === orderId ? null : orderId);
+        setSelectedOrder(order);
+        setExpandedOrder(expandedOrder === order.id ? null : order.id);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar endereço:", error);
+    }
   };
 
-  const handleCancelOrder = (order: Order) => {
+  const handleCancelOrder = (order: OrderDTO) => {
     setSelectedOrder(order);
     setCancelDialogOpen(true);
   };
 
-  const handleEditItem = (item: OrderItem) => {
-    // Add your edit logic here
+  const handleEditItem = (item: OrderItemDTO) => {
     console.log("Editing item:", item);
+  };
+
+  const convertToOrderRequestDTO = (orderDTO: OrderDTO): OrderRequestDTO => {
+    return {
+      customerId: orderDTO.customerId,
+      orderItems: orderDTO.orderItems,
+      status: orderDTO.status,
+      payment: orderDTO.payment,
+      deliveryAddress: orderDTO.addressId,
+      promotionIds: [],
+    };
   };
 
   const confirmCancelOrder = () => {
@@ -189,30 +247,25 @@ export const CustomerOrders = () => {
       );
       setCancelDialogOpen(false);
       setSelectedOrder(null);
-      setCancellationReason("");
+      orderService.updateOrder(selectedOrder?.id ?? 0, {
+        customerId: selectedOrder.customerId,
+        orderItems: selectedOrder.orderItems,
+        status: "CANCELADO", // ou selectedOrder.status se quiser manter o status atual
+        payment: selectedOrder.payment,
+        deliveryAddress: selectedOrder.addressId,
+        promotionIds: [],
+      });
     }
   };
 
-  const getStatusColor = (status: Order["status"]) => {
-    const colors = {
-      pending: "warning",
-      processing: "info",
-      shipped: "primary",
-      delivered: "success",
-      cancelled: "error",
-    } as const;
-    return colors[status];
-  };
-
-  // Add these functions inside CustomerOrders component:
   const handleQuantityChange = (index: number, newQuantity: number) => {
     if (selectedOrder) {
       const updatedOrders = orders.map((order) => {
         if (order.id === selectedOrder.id) {
-          const updatedItems = [...order.items];
+          const updatedItems = [...order.orderItems];
           updatedItems[index].quantity = newQuantity;
-          updatedItems[index].subtotal =
-            newQuantity * updatedItems[index].unitPrice;
+          updatedItems[index].totalPrice =
+            newQuantity * updatedItems[index].price;
           return { ...order, items: updatedItems };
         }
         return order;
@@ -223,25 +276,29 @@ export const CustomerOrders = () => {
 
   const calculateTotalItems = () => {
     return (
-      selectedOrder?.items.reduce((sum, item) => sum + item.quantity, 0) || 0
+      selectedOrder?.orderItems.reduce((sum, item) => sum + item.quantity, 0) ||
+      0
     );
   };
 
   const calculateSubtotal = () => {
     return (
-      selectedOrder?.items.reduce((sum, item) => sum + item.subtotal, 0) || 0
+      selectedOrder?.orderItems.reduce(
+        (sum, item) => sum + item.totalPrice,
+        0
+      ) || 0
     );
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() - (selectedOrder?.discount || 0);
+    return calculateSubtotal() - (selectedOrder?.discountAmount || 0);
   };
 
   const handleRemoveItem = (index: number) => {
     if (selectedOrder) {
       const updatedOrders = orders.map((order) => {
         if (order.id === selectedOrder.id) {
-          const updatedItems = order.items.filter((_, i) => i !== index);
+          const updatedItems = order.orderItems.filter((_, i) => i !== index);
           return { ...order, items: updatedItems };
         }
         return order;
@@ -250,280 +307,419 @@ export const CustomerOrders = () => {
     }
   };
 
-  const getStatusLabel = (status: Order["status"]) => {
-    const labels = {
-      pending: "Pendente",
-      processing: "Em Processamento",
-      shipped: "Enviado",
-      delivered: "Entregue",
-      cancelled: "Cancelado",
+  const getStatusFromLabel = (label: string): OrderDTO["status"] => {
+    const labelsToStatusMap: { [key: string]: OrderDTO["status"] } = {
+      "AGUARDANDO PAGAMENTO": "pending",
+      PREPARANDO: "processing",
+      ENVIADO: "shipped",
+      ENTREGUE: "delivered",
+      CANCELADO: "cancelled",
     };
-    return labels[status];
+
+    return labelsToStatusMap[label] || label;
   };
 
+  const getStatusColor = (order: OrderDTO) => {
+    const status = getStatusFromLabel(order.status);
+
+    const colors = {
+      pending: "warning",
+      processing: "info",
+      shipped: "primary",
+      delivered: "success",
+      cancelled: "error",
+    } as const;
+
+    return colors[status] || "gray";
+  };
+
+  const getStatusLabel = (order: OrderDTO) => {
+    const status = getStatusFromLabel(order.status);
+    const labels = {
+      pending: "AGUARDANDO PAGAMENTO",
+      processing: "PREPARANDO",
+      shipped: "ENVIADO",
+      delivered: "ENTREGUE",
+      cancelled: "CANCELADO",
+    };
+
+    return labels[status] || "DESCONHECIDO";
+  };
+
+  const trackingData = [
+    {
+      status: "Pedido Recebido",
+      date: "2024-01-20 14:30",
+      description: "Pedido confirmado e processado",
+      icon: <Package className="w-5 h-5 text-white" />,
+      completed: true,
+    },
+    {
+      status: "Em Separação",
+      date: "2024-01-21 09:15",
+      description: "Produtos sendo separados no estoque",
+      icon: <CheckCircle className="w-5 h-5 text-white" />,
+      completed: true,
+    },
+    {
+      status: "Em Transporte",
+      date: "2024-01-21 16:45",
+      description: "Pedido saiu para entrega",
+      icon: <Truck className="w-5 h-5 text-white" />,
+      completed: true,
+    },
+    {
+      status: "Entrega Prevista",
+      date: "2024-01-22 13:00",
+      description: "Previsão de entrega ao destinatário",
+      icon: <Home className="w-5 h-5 text-white" />,
+      completed: false,
+    },
+  ];
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Meus Pedidos
-        </Typography>
-
-        <Grid container spacing={3}>
-          {orders.map((order) => (
-            <Grid item xs={12} key={order.id}>
-              <Card>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography variant="h6">Pedido #{order.id}</Typography>
-                    <Chip
-                      label={getStatusLabel(order.status)}
-                      color={getStatusColor(order.status)}
-                    />
-                  </Box>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={4}>
-                      <Typography color="textSecondary">
-                        Data do Pedido
-                      </Typography>
-                      <Typography>
-                        {new Date(order.orderDate).toLocaleDateString()}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Typography color="textSecondary">Valor Total</Typography>
-                      <Typography>R$ {order.total.toFixed(2)}</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Typography color="textSecondary">
-                        Forma de Pagamento
-                      </Typography>
-                      <Typography>
-                        {order.paymentMethod === "credit"
-                          ? "Cartão de Crédito"
-                          : order.paymentMethod === "debit"
-                          ? "Cartão de Débito"
-                          : order.paymentMethod === "pix"
-                          ? "PIX"
-                          : "Boleto"}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                  <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleExpandOrder(order.id)}
-                      endIcon={
-                        expandedOrder === order.id ? (
-                          <ExpandLessIcon />
-                        ) : (
-                          <ExpandMoreIcon />
-                        )
-                      }
-                    >
-                      {expandedOrder === order.id
-                        ? "Ocultar Detalhes"
-                        : "Ver Detalhes"}
-                    </Button>
-                    {order.status === "processing" && (
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        onClick={() => handleCancelOrder(order)}
-                      >
-                        Cancelar Pedido
-                      </Button>
-                    )}
-                    {order.trackingCode && (
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<ShippingIcon />}
-                      >
-                        Rastrear Pedido
-                      </Button>
-                    )}
-                  </Box>
-
-                  <Collapse in={expandedOrder === order.id}>
-                    <Box sx={{ mt: 3 }}>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                          <Card>
-                            <CardContent>
-                              <Typography variant="h6">
-                                Itens do Pedido
-                              </Typography>
-                              <List>
-                                {order.items.map((item, index) => (
-                                  <ListItem key={index}>
-                                    <ListItemText
-                                      primary={item.productName}
-                                      secondary={`R$ ${item.unitPrice.toFixed(
-                                        2
-                                      )}`}
-                                    />
-                                    <TextField
-                                      type="number"
-                                      value={item.quantity}
-                                      onChange={(e) =>
-                                        handleQuantityChange(
-                                          index,
-                                          parseInt(e.target.value)
-                                        )
-                                      }
-                                      inputProps={{ min: 1 }}
-                                      sx={{ width: 80, mx: 2 }}
-                                    />
-                                    <Typography sx={{ minWidth: 100 }}>
-                                      R$ {item.subtotal.toFixed(2)}
-                                    </Typography>
-                                    <ListItemSecondaryAction>
-                                      <IconButton
-                                        onClick={() => handleRemoveItem(index)}
-                                      >
-                                        <DeleteIcon />
-                                      </IconButton>
-                                    </ListItemSecondaryAction>
-                                  </ListItem>
-                                ))}
-                              </List>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                          <Card>
-                            <CardContent>
-                              <Typography variant="h6">
-                                Resumo do Pedido
-                              </Typography>
-                              <List>
-                                <ListItem>
-                                  <ListItemText primary="Quantidade de Itens" />
-                                  <Typography>
-                                    {calculateTotalItems()} itens
-                                  </Typography>
-                                </ListItem>
-                                <ListItem>
-                                  <ListItemText primary="Subtotal" />
-                                  <Typography>
-                                    R$ {calculateSubtotal().toFixed(2)}
-                                  </Typography>
-                                </ListItem>
-                                <ListItem>
-                                  <ListItemText primary="Desconto" />
-                                  <Typography>
-                                    R${" "}
-                                    {(selectedOrder?.discount || 0).toFixed(2)}
-                                  </Typography>
-                                </ListItem>
-                                <Divider />
-                                <ListItem>
-                                  <ListItemText primary="Total" />
-                                  <Typography variant="h6">
-                                    R$ {calculateTotal().toFixed(2)}
-                                  </Typography>
-                                </ListItem>
-                              </List>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle1" gutterBottom>
-                            Endereço de Entrega
-                          </Typography>
-                          <Typography>
-                            {`${order.shippingAddress.street}, ${order.shippingAddress.number}`}
-                          </Typography>
-                          {order.shippingAddress.complement && (
-                            <Typography>
-                              {order.shippingAddress.complement}
-                            </Typography>
-                          )}
-                          <Typography>
-                            {`${order.shippingAddress.neighborhood}, ${order.shippingAddress.city}/${order.shippingAddress.state}`}
-                          </Typography>
-                          <Typography>
-                            {order.shippingAddress.zipCode}
-                          </Typography>
-                        </Grid>
-
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle1" gutterBottom>
-                            Pagamento
-                          </Typography>
-                          <PaymentDetails order={order} />
-                        </Grid>
-
-                        {order.trackingCode && (
-                          <Grid item xs={12}>
-                            <Typography variant="subtitle1" gutterBottom>
-                              Rastreamento
-                            </Typography>
-                            <Typography>
-                              Código de Rastreio: {order.trackingCode}
-                            </Typography>
-                          </Grid>
-                        )}
-
-                        {order.notes && (
-                          <Grid item xs={12}>
-                            <Typography variant="subtitle1" gutterBottom>
-                              Observações
-                            </Typography>
-                            <Typography>{order.notes}</Typography>
-                          </Grid>
-                        )}
-                      </Grid>
-                    </Box>
-                  </Collapse>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
-
-      <Dialog
-        open={cancelDialogOpen}
-        onClose={() => setCancelDialogOpen(false)}
+    <Box sx={{ flexGrow: 1 }}>
+      <MenuItemsSummCustomer
+        user={user}
+        isAuthenticated={isAuthenticated}
+        logout={logout}
+      />
+      return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          backgroundColor: "#f0f4f8",
+        }}
       >
-        <DialogTitle>Cancelar Pedido</DialogTitle>
-        <DialogContent>
-          <Typography gutterBottom>
-            Tem certeza que deseja cancelar este pedido?
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            label="Motivo do Cancelamento"
-            value={cancellationReason}
-            onChange={(e) => setCancellationReason(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCancelDialogOpen(false)}>Voltar</Button>
-          <Button
-            onClick={confirmCancelOrder}
-            color="error"
-            variant="contained"
+        <Box sx={{ p: 3 }}>
+          <Container maxWidth="lg" sx={{ mt: 4 }}>
+            <Paper elevation={3} sx={{ p: 3 }}>
+              <Typography variant="h5" gutterBottom>
+                Meus Pedidos
+              </Typography>
+
+              <Grid container spacing={3}>
+                {orders.map((order) => (
+                  <Grid item xs={12} key={order.id}>
+                    <Card>
+                      <CardContent>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            mb: 2,
+                          }}
+                        >
+                          <Typography variant="h6">
+                            Pedido #{order.id}
+                          </Typography>
+                          <Chip
+                            label={getStatusLabel(order)}
+                            color={getStatusColor(order)}
+                          />
+                        </Box>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={4}>
+                            <Typography color="textSecondary">
+                              Data do Pedido
+                            </Typography>
+                            <Typography>
+                              {new Date(order.orderDate).toLocaleDateString()}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Typography color="textSecondary">
+                              Valor Total
+                            </Typography>
+                            <Typography>
+                              R$ {order.subTotal.toFixed(2)}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Typography color="textSecondary">
+                              Forma de Pagamento
+                            </Typography>
+                            <Typography>{order.payment.paymentMethod}</Typography>
+                          </Grid>
+                        </Grid>
+                        <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => handleExpandOrder(order)}
+                            endIcon={
+                              expandedOrder === order.id ? (
+                                <ExpandLessIcon />
+                              ) : (
+                                <ExpandMoreIcon />
+                              )
+                            }
+                          >
+                            {expandedOrder === order.id
+                              ? "Ocultar Detalhes"
+                              : "Ver Detalhes"}
+                          </Button>
+                          {(order.status === "AGUARDANDO PAGAMENTO" ||
+                            order.status === "PREPARANDO") && (
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="small"
+                              onClick={() => handleCancelOrder(order)}
+                            >
+                              Cancelar Pedido
+                            </Button>
+                          )}
+                          {order.status !== "AGUARDANDO PAGAMENTO" &&
+                            order.status !== "PREPARANDO" &&
+                            order.status !== "CANCELADO" && (
+                              <Button
+                                startIcon={<ShippingIcon />}
+                                variant="outlined"
+                                size="small"
+                                onClick={() => handleTrackOrder(order)}
+                                endIcon={
+                                  expandedOrder === order.id ? (
+                                    <ExpandLessIcon />
+                                  ) : (
+                                    <ExpandMoreIcon />
+                                  )
+                                }
+                              >
+                                {expandedOrder === order.id
+                                  ? "Ocultar Detalhes"
+                                  : "Rastrear Pedido"}
+                              </Button>
+                            )}
+                        </Box>
+
+                        {expandedTracking === order.id && (
+                          <Grid container spacing={3} gap={10}>
+                            <Grid item xs={12}>
+                              <Box sx={{ mt: 3 }} />
+                              <div>
+                                <Paper
+                                  className="p-6"
+                                  sx={{ width: "100%", padding: 3 }}
+                                >
+                                  <Typography
+                                    variant="h6"
+                                    className="mb-4 font-bold"
+                                  >
+                                    Informações de Rastreio
+                                  </Typography>
+
+                                  <div className="space-y-6">
+                                    {trackingData.map((step, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start space-x-4"
+                                      >
+                                        <Typography
+                                          padding={1}
+                                          variant="subtitle1"
+                                          className={
+                                            step.completed
+                                              ? "text-blue-500"
+                                              : "text-gray-500"
+                                          }
+                                        >
+                                          {step.icon} {step.status}
+                                        </Typography>
+                                        <Typography
+                                          variant="body2"
+                                          color="textSecondary"
+                                          paddingLeft={1}
+                                        >
+                                          {step.date}
+                                        </Typography>
+                                        <Typography
+                                          variant="body2"
+                                          color="textSecondary"
+                                          padding={1}
+                                        >
+                                          {step.description}
+                                        </Typography>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </Paper>
+                              </div>
+                            </Grid>
+                          </Grid>
+                        )}
+
+                        <Collapse in={expandedOrder === order.id}>
+                          <Box sx={{ mt: 3 }}>
+                            <Grid container spacing={3}>
+                              <Grid item xs={12}>
+                                <Card>
+                                  <CardContent>
+                                    <Typography variant="h6">
+                                      Itens do Pedido
+                                    </Typography>
+                                    <List>
+                                      {order.orderItems.map((item, index) => (
+                                        <ListItem key={index}>
+                                          <ListItemText
+                                            primary={item.productId}
+                                            secondary={`R$ ${item.price.toFixed(
+                                              2
+                                            )}`}
+                                          />
+                                          <TextField
+                                            type="number"
+                                            value={item.quantity}
+                                            onChange={(e) =>
+                                              handleQuantityChange(
+                                                index,
+                                                parseInt(e.target.value)
+                                              )
+                                            }
+                                            inputProps={{ min: 1 }}
+                                            sx={{ width: 80, mx: 2 }}
+                                          />
+                                          <Typography sx={{ minWidth: 100 }}>
+                                            R$ {item.totalPrice.toFixed(2)}
+                                          </Typography>
+                                          <ListItemSecondaryAction>
+                                            <IconButton
+                                              onClick={() =>
+                                                handleRemoveItem(index)
+                                              }
+                                            >
+                                              {/*<DeleteIcon />*/}
+                                            </IconButton>
+                                          </ListItemSecondaryAction>
+                                        </ListItem>
+                                      ))}
+                                    </List>
+                                  </CardContent>
+                                </Card>
+                              </Grid>
+
+                              <Grid item xs={12}>
+                                <Card>
+                                  <CardContent>
+                                    <Typography variant="h6">
+                                      Resumo do Pedido
+                                    </Typography>
+                                    <List>
+                                      <ListItem>
+                                        <ListItemText primary="Quantidade de Itens" />
+                                        <Typography>
+                                          {calculateTotalItems()} itens
+                                        </Typography>
+                                      </ListItem>
+                                      <ListItem>
+                                        <ListItemText primary="Subtotal" />
+                                        <Typography>
+                                          R$ {calculateSubtotal().toFixed(2)}
+                                        </Typography>
+                                      </ListItem>
+                                      <ListItem>
+                                        <ListItemText primary="Desconto" />
+                                        <Typography>
+                                          R${" "}
+                                          {(
+                                            selectedOrder?.discountAmount || 0
+                                          ).toFixed(2)}
+                                        </Typography>
+                                      </ListItem>
+                                      <Divider />
+                                      <ListItem>
+                                        <ListItemText primary="Total" />
+                                        <Typography variant="h6">
+                                          R$ {calculateTotal().toFixed(2)}
+                                        </Typography>
+                                      </ListItem>
+                                    </List>
+                                  </CardContent>
+                                </Card>
+                              </Grid>
+
+                              <Grid item xs={12} md={6}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                  Endereço de Entrega
+                                </Typography>
+                                <Typography>{address?.type}</Typography>
+                                <Typography>
+                                  {`${address?.street}, ${address?.number}`}
+                                </Typography>
+                                <Typography>{address?.complement}</Typography>
+                                <Typography>
+                                  {`${address?.neighborhood}, ${address?.city}/${address?.state}, ${address?.country}`}
+                                </Typography>
+                                <Typography>{address?.zipCode}</Typography>
+                              </Grid>
+
+                              <Grid item xs={12} md={6}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                  Pagamento
+                                </Typography>
+                                <PaymentDetails order={order} />
+                                <Typography>
+                                  Status do pagamento: {order.payment.status}
+                                </Typography>
+                                <Typography>
+                                  Data do pagamento: {order.payment.paymentDate}
+                                </Typography>
+                              </Grid>
+
+                              <Grid item xs={12}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                  Rastreamento
+                                </Typography>
+                                <Typography>
+                                  Código de Rastreio: "PYB54824D5"
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </Collapse>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
+          </Container>
+          <Dialog
+            open={cancelDialogOpen}
+            onClose={() => setCancelDialogOpen(false)}
           >
-            Confirmar Cancelamento
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>Cancelar Pedido</DialogTitle>
+            <DialogContent>
+              <Typography gutterBottom>
+                Tem certeza que deseja cancelar este pedido?
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="Motivo do Cancelamento"
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                sx={{ mt: 2 }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setCancelDialogOpen(false)}>Voltar</Button>
+              <Button
+                onClick={confirmCancelOrder}
+                color="error"
+                variant="contained"
+              >
+                Confirmar Cancelamento
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
+      </Box>
+      <Footer />
     </Box>
   );
 };

@@ -6,71 +6,51 @@ import {
   Button,
   Typography,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Snackbar,
   Alert,
-  FormControlLabel,
-  Checkbox,
-  Container,
 } from "@mui/material";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext.tsx";
 import { MenuItemsSummCustomer } from "../Components/MenuItemsSummCustomer.tsx";
 import { Footer } from "../Components/Footer.tsx";
-import { userService } from "../../services/user.service.ts";
-import { UserRequest } from "../../types/user.types.ts";
+import { Address } from "../../types/customer.types.ts";
+import { customerService } from "../../services/customer.service.ts";
+import { AddressList } from "../Components/AddressList.tsx";
 
 const validationSchema = yup.object({
   name: yup.string().required("Nome é obrigatório"),
   lastName: yup.string().required("Sobrenome é obrigatório"),
   email: yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
-  cpf: yup.string().required("CPF é obrigatório"),
   phone: yup.string().required("Telefone é obrigatório"),
-  idProfile: yup
-    .number()
-    .min(1, "Perfil é obrigatório")
-    .required("Perfil é obrigatório"),
-  password: yup
-    .string()
-    .min(6, "A senha deve ter no mínimo 6 caracteres")
-    .required("Senha é obrigatória"),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "As senhas devem ser iguais")
-    .required("Confirmação de senha é obrigatória"),
-  status: yup.boolean().required("Status é obrigatório"),
+  birthDate: yup.date().required("Data de nascimento é obrigatória"),
+  addresses: yup
+    .array()
+    .of(
+      yup.object({
+        zipCode: yup.string().required("CEP é obrigatório"),
+        street: yup.string().required("Rua é obrigatória"),
+        number: yup.string().required("Número é obrigatório"),
+        neighborhood: yup.string().required("Bairro é obrigatório"),
+        type: yup.string().required("Tipo é obrigatório"),
+        city: yup.string().required("Cidade é obrigatória"),
+        state: yup.string().required("Estado é obrigatório"),
+        country: yup.string().required("País é obrigatório"),
+        complement: yup.string(),
+      })
+    )
+    .min(1, "Adicione pelo menos um endereço")
+    .required("Adicione pelo menos um endereço"),
 });
 
-export const RegisterUser = () => {
-  const navigate = useNavigate();
+export const CustomerProfile = () => {
   const { isAuthenticated, user, logout } = useAuthContext();
-  const [profiles, setProfiles] = useState<
-    Array<{ id: number; name: string; status: boolean }>
-  >([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
-
-  useEffect(() => {
-    fetchProfiles();
-  }, []);
-
-  const fetchProfiles = async () => {
-    try {
-      const fetchedProfiles = await userService.getAllUserProfiles();
-      setProfiles(fetchedProfiles);
-    } catch (error) {
-      console.error("Failed to fetch profiles:", error);
-      showSnackbar("Erro ao carregar perfis!", "error");
-    }
-  };
+  const [customerId, setCustomerId] = useState<number | null>(null);
 
   const showSnackbar = (message: string, severity: "success" | "error") => {
     setSnackbarMessage(message);
@@ -78,47 +58,97 @@ export const RegisterUser = () => {
     setOpenSnackbar(true);
   };
 
-  const formik = useFormik({
+  interface FormValues {
+    name: string;
+    lastName: string;
+    email: string;
+    cpf: string;
+    phone: string;
+    birthDate: string;
+    addresses: Address[];
+  }
+
+  const formik = useFormik<FormValues>({
     initialValues: {
       name: "",
       lastName: "",
       email: "",
       cpf: "",
       phone: "",
-      idProfile: 0,
-      password: "",
-      confirmPassword: "",
-      status: true,
+      birthDate: "",
+      addresses: [],
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        const userRequest: UserRequest = {
+        if (values.addresses.length === 0) {
+          formik.setFieldError("addresses", "Adicione pelo menos um endereço");
+          return;
+        }
+
+        const customerRequest = {
           name: values.name,
           lastName: values.lastName,
           email: values.email,
           cpf: values.cpf,
           phone: values.phone,
-          password: values.password,
-          profile: profiles.find((p) => p.id === values.idProfile) || {
-            id: 0,
-            name: "",
-            status: false,
-          },
-          status: values.status,
+          birthDate: values.birthDate,
+          addresses: values.addresses,
         };
 
-        await userService.createUser(userRequest);
-        showSnackbar("Usuário cadastrado com sucesso!", "success");
-        setTimeout(() => {
-          navigate("/manage-user");
-        }, 2000);
+        if (customerId !== null) {
+          await customerService.updateCustomer(customerId, customerRequest);
+          showSnackbar("Dados atualizados com sucesso!", "success");
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          showSnackbar("ID do cliente não encontrado!", "error");
+        }
+        showSnackbar("Dados atualizados com sucesso!", "success");
       } catch (error) {
-        console.error("Registration error:", error);
-        showSnackbar("Erro ao cadastrar usuário!", "error");
+        console.error("Update error:", error);
+        showSnackbar("Erro ao atualizar dados!", "error");
       }
     },
   });
+
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      try {
+        if (user) {
+          const customerData = await customerService.getCustomerByUserId(
+            user.id
+          );
+          setCustomerId(customerData.id ?? null);
+
+          if (customerData.id) {
+            const addressesData = await customerService.getCustomerAddresses(
+              customerData.id
+            );
+
+            formik.setValues({
+              name: customerData.name,
+              lastName: customerData.lastName,
+              email: customerData.email,
+              cpf: customerData.cpf,
+              phone: customerData.phone,
+              birthDate: customerData.birthDate,
+              addresses: addressesData || [],
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching customer data:", error);
+        showSnackbar("Erro ao carregar dados do cliente!", "error");
+      }
+    };
+
+    if (user?.id) {
+      fetchCustomerData();
+    }
+  }, [user?.id]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -127,12 +157,9 @@ export const RegisterUser = () => {
         isAuthenticated={isAuthenticated}
         logout={logout}
       />
-      
       return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
-      <Box sx={{ mt: 4 }} />
-      <Container sx={{ mt: 10, mb: 4 }}>
-        
+        <Box sx={{ mt: 1 }} />
         <Paper
           elevation={3}
           sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
@@ -142,7 +169,7 @@ export const RegisterUser = () => {
             component="h1"
             sx={{ mb: 3, textAlign: "center" }}
           >
-            Cadastro de Usuário
+            Meu Perfil
           </Typography>
 
           <form onSubmit={formik.handleSubmit}>
@@ -192,9 +219,7 @@ export const RegisterUser = () => {
                   name="cpf"
                   label="CPF"
                   value={formik.values.cpf}
-                  onChange={formik.handleChange}
-                  error={formik.touched.cpf && Boolean(formik.errors.cpf)}
-                  helperText={formik.touched.cpf && formik.errors.cpf}
+                  disabled
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -210,76 +235,45 @@ export const RegisterUser = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl
-                  fullWidth
-                  error={
-                    formik.touched.idProfile && Boolean(formik.errors.idProfile)
-                  }
-                >
-                  <InputLabel id="profile-label">Perfil</InputLabel>
-                  <Select
-                    labelId="profile-label"
-                    id="idProfile"
-                    name="idProfile"
-                    value={formik.values.idProfile}
-                    label="Perfil"
-                    onChange={formik.handleChange}
-                  >
-                    {profiles.map((profile) => (
-                      <MenuItem key={profile.id} value={profile.id}>
-                        {profile.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  id="password"
-                  name="password"
-                  label="Senha"
-                  type="password"
-                  value={formik.values.password}
+                  id="birthDate"
+                  name="birthDate"
+                  label="Data de Nascimento"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={formik.values.birthDate}
                   onChange={formik.handleChange}
                   error={
-                    formik.touched.password && Boolean(formik.errors.password)
-                  }
-                  helperText={formik.touched.password && formik.errors.password}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  label="Confirmar Senha"
-                  type="password"
-                  value={formik.values.confirmPassword}
-                  onChange={formik.handleChange}
-                  error={
-                    formik.touched.confirmPassword &&
-                    Boolean(formik.errors.confirmPassword)
+                    formik.touched.birthDate && Boolean(formik.errors.birthDate)
                   }
                   helperText={
-                    formik.touched.confirmPassword &&
-                    formik.errors.confirmPassword
+                    formik.touched.birthDate && formik.errors.birthDate
                   }
                 />
               </Grid>
+
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="status"
-                      name="status"
-                      checked={formik.values.status}
-                      onChange={formik.handleChange}
-                    />
-                  }
-                  label="Ativo"
-                />
+                <Typography variant="h6" sx={{ mt: 2, mb: 2 }}>
+                  Endereços
+                </Typography>
               </Grid>
+
+              <Grid item xs={12}>
+                <AddressList
+                  addresses={formik.values.addresses}
+                  formik={formik}
+                  customerId={customerId}
+                />
+                {formik.touched.addresses &&
+                  formik.errors.addresses &&
+                  typeof formik.errors.addresses === "string" && (
+                    <Typography color="error" sx={{ mt: 2 }}>
+                      {formik.errors.addresses}
+                    </Typography>
+                  )}
+              </Grid>
+
               <Grid item xs={12}>
                 <Button
                   fullWidth
@@ -287,7 +281,7 @@ export const RegisterUser = () => {
                   type="submit"
                   sx={{ mt: 3 }}
                 >
-                  Cadastrar
+                  Salvar Alterações
                 </Button>
               </Grid>
             </Grid>
@@ -304,7 +298,6 @@ export const RegisterUser = () => {
             {snackbarMessage}
           </Alert>
         </Snackbar>
-        </Container>
       </Box>
       <Footer />
     </Box>

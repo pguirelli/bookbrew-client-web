@@ -8,7 +8,7 @@ interface ImageCarouselProps {
 }
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
-  const [activeIndex, setActiveIndex] = useState(0); // Estado para o slide ativo
+  const [activeIndex, setActiveIndex] = useState(0); 
 
   const arrowStyle = (direction: string): React.CSSProperties => ({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
