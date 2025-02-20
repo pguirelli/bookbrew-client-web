@@ -1,5 +1,5 @@
 export interface Address {
-    id?: number;
+    id: number;
     zipCode: string;
     street: string;
     number: string;
@@ -19,7 +19,7 @@ export interface Address {
     email: string;
     cpf: string;
     phone: string;
-    password: string;
+    password?: string;
     status?: boolean;
     birthDate: string;
     addresses?: Address[];
@@ -31,8 +31,13 @@ export interface Address {
   }
   
   export interface CustomerUpdate {
-    name: string;
-    lastName: string;
-    email: string;
+    id?: number;
+    userId?: number;
+    name?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    status?: boolean;
+    birthDate?: string;
+    addresses?: Address[];
   }
-  

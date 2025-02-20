@@ -46,30 +46,9 @@ import { productService } from "../../services/product.service.ts";
 import ImageCarousel from "../../pages/Shopping/ImageCarousel.tsx";
 import { Brand } from "../../types/product.types";
 import { CategoryProd } from "../../types/product.types";
-
-function base64ToBlob(
-  base64: string,
-  contentType: string = "",
-  sliceSize: number = 512
-): Blob {
-  const base64Data = base64.split(",")[1] || base64;
-  const byteCharacters = atob(base64Data);
-  const byteArrays: Uint8Array[] = [];
-
-  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-    const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-    const byteNumbers = new Array(slice.length);
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i);
-    }
-
-    const byteArray = new Uint8Array(byteNumbers);
-    byteArrays.push(byteArray);
-  }
-
-  return new Blob(byteArrays, { type: contentType });
-}
+import { MenuItemsManagement } from "../../pages/Components/MenuItemsManagement.tsx";
+import { Footer } from "../../pages/Components/Footer.tsx";
+import { base64ToBlob } from "../../pages/Components/FunctionToConvertBase64Blob.tsx";
 
 function discountedPrice(price: number, discount: number): number {
   if (discount > 0) {
@@ -100,11 +79,6 @@ export const Shopping = () => {
   const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [showBestSellers, setShowBestSellers] = useState(false);
-
-  const isAdmin = user?.profile.id === 1;
-  const isManager = user?.profile.id === 2;
-  const isModerator = user?.profile.id === 3;
-  const isCustomer = user?.profile.id === 4;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -180,72 +154,6 @@ export const Shopping = () => {
     return <div>{error}</div>; // Exibe a mensagem de erro
   }
 
-  const menuItems = isAuthenticated ? (
-    <>
-      {(isAdmin || isManager) && (
-        <>
-          <MenuItem onClick={() => navigate("/manage-order")}>Pedidos</MenuItem>
-          <MenuItem onClick={() => navigate("/process-order")}>
-            Processar Pedido
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/manage-promotion")}>
-            Promoções
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/moderate-reviews")}>
-            Avaliações
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/manage-category")}>
-            Categoria
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/manage-brand")}>Marca</MenuItem>
-          <MenuItem onClick={() => navigate("/manage-product")}>
-            Produto
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/manage-user")}>Usuários</MenuItem>
-          <MenuItem onClick={() => navigate("/manage-customer")}>
-            Clientes
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/user-profile")}>Perfis</MenuItem>
-        </>
-      )}
-      {isModerator && (
-        <>
-          <MenuItem onClick={() => navigate("/moderate-reviews")}>
-            Avaliações
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/manage-product")}>
-            Produto
-          </MenuItem>
-        </>
-      )}
-      {isCustomer && (
-        <>
-          <MenuItem onClick={() => navigate("/user-profile")}>
-            Meus Dados
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/customer-orders")}>
-            Meus Pedidos
-          </MenuItem>
-          <MenuItem onClick={() => navigate("/customer-review")}>
-            Minhas Avaliações
-          </MenuItem>
-        </>
-      )}
-      <Divider />
-      <MenuItem onClick={() => navigate("/change-password")}>
-        Alterar Senha
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          logout();
-          navigate("/login");
-        }}
-      >
-        Sair
-      </MenuItem>
-    </>
-  ) : null;
-
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -271,14 +179,14 @@ export const Shopping = () => {
   const handleProductsClick = () => {
     setProductsOpen(!productsOpen);
     if (!productsOpen) {
-      setCategoriesOpen(false); // Fecha o expansível de categorias
+      setCategoriesOpen(false);
     }
   };
 
   const handleCategoriesClick = () => {
     setCategoriesOpen(!categoriesOpen);
     if (!categoriesOpen) {
-      setProductsOpen(false); // Fecha o expansível de marcas
+      setProductsOpen(false);
     }
   };
 
@@ -514,7 +422,11 @@ export const Shopping = () => {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        {menuItems}
+        <MenuItemsManagement
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
       </Menu>
 
       <Container sx={{ mt: 10, mb: 4 }}>
@@ -556,11 +468,22 @@ export const Shopping = () => {
                 >
                   <Box sx={{ flex: "1 1 auto" }}>
                     <ImageCarousel
-                      images={(product.productImages ?? []).map((image) =>
-                        URL.createObjectURL(
-                          base64ToBlob(image.imageData, "image/jpeg")
-                        )
-                      )}
+                      images={(product?.productImages ?? [])
+                        .map((image) => {
+                          const blob = base64ToBlob(
+                            image.imageData,
+                            "image/jpeg"
+                          );
+                          if (!blob) {
+                            console.error(
+                              "Falha ao converter dados da imagem para Blob:",
+                              image
+                            );
+                            return null;
+                          }
+                          return URL.createObjectURL(blob);
+                        })
+                        .filter((url): url is string => url !== null)}
                     />
                   </Box>
                   <Box
@@ -733,55 +656,7 @@ export const Shopping = () => {
         )}
       </Container>
 
-      <Box
-        component="footer"
-        sx={{
-          py: 3,
-          px: 2,
-          mt: "auto",
-          backgroundColor: (theme) => theme.palette.grey[200],
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid item xs={12} sm={4}>
-              <Typography variant="h6" color="text.primary" gutterBottom>
-                Sobre a BookBrew
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Sua loja especializada em livros, cafés, perfumes e bebidas.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Typography variant="h6" color="text.primary" gutterBottom>
-                Contato
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Email: contato@bookbrew.com
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Tel: (11) 1234-5678
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Typography variant="h6" color="text.primary" gutterBottom>
-                Redes Sociais
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Instagram • Facebook • Twitter
-              </Typography>
-            </Grid>
-          </Grid>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            align="center"
-            sx={{ mt: 2 }}
-          >
-            © 2024 BookBrew. Todos os direitos reservados.
-          </Typography>
-        </Container>
-      </Box>
+      <Footer />
     </Box>
   );
 };

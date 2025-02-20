@@ -7,14 +7,6 @@ export interface OrderRequestDTO {
   promotionIds: number[];
 }
 
-export interface PaymentDTO {
-  id?: number;
-  paymentMethod: string;
-  status: string;
-  transactionCode: string;
-  paymentDate: string;
-}
-
 export interface ProductReviewDTO {
   id?: number;
   productId: number;
@@ -44,6 +36,14 @@ export interface PromotionDTO {
   status: boolean;
   creationDate?: string;
   updateDate?: string;
+}
+
+export interface PaymentDTO {
+  id?: number;
+  paymentMethod: string;
+  status: string;
+  transactionCode: string;
+  paymentDate: string;
 }
 
 export interface OrderDTO {

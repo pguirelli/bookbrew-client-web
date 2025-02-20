@@ -23,9 +23,9 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useFormik } from "formik";
-import { productService } from "../../services/product.service.ts";
+import { userService } from "../../services/user.service.ts";
 import * as yup from "yup";
-import { CategoryProd } from "../../types/product.types.ts";
+import { UserProfile } from "../../types/user.types.ts";
 import { useAuthContext } from "../../contexts/AuthContext.tsx";
 import { ConfirmationDialog } from "../../pages/Components/ConfirmationDialog.tsx";
 import { Footer } from "../../pages/Components/Footer.tsx";
@@ -34,53 +34,64 @@ import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCusto
 type Order = "asc" | "desc";
 
 const validationSchema = yup.object({
-  description: yup.string().required("Informe a categoria para cadastro"),
+  name: yup.string().required("Informe o perfil de usuário para cadastro"),
   status: yup.boolean().required(),
 });
 
-export const ManageCategory = () => {
+export const ManageUserProfile = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categories, setCategories] = useState<CategoryProd[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [order, setOrder] = useState<Order>("asc");
-  const [orderBy, setOrderBy] = useState<keyof CategoryProd>("description");
+  const [orderBy, setOrderBy] = useState<keyof UserProfile>("name");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [errors, setErrors] = useState<{ description?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string }>({});
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
   const { isAuthenticated, user, logout } = useAuthContext();
+
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-    null
-  );
+  const [selectedUserProfileId, setSelectedUserProfileId] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
-    fetchCategories();
+    fetchUserProfile();
   }, []);
 
-  const fetchCategories = async () => {
+  const openConfirmDialog = (userprofileId: number) => {
+    setSelectedUserProfileId(userprofileId);
+    setConfirmDialogOpen(true);
+  };
+
+  const closeConfirmDialog = () => {
+    setSelectedUserProfileId(null);
+    setConfirmDialogOpen(false);
+  };
+
+  const fetchUserProfile = async () => {
     try {
-      const fetchedCategories: CategoryProd[] =
-        await productService.getAllCategories();
-      setCategories(fetchedCategories);
+      const fetchedUserProfile: UserProfile[] =
+        await userService.getAllUserProfiles();
+      setUserProfile(fetchedUserProfile);
     } catch (error) {
-      console.error("Failed to fetch categories:", error);
+      console.error("Failed to fetch user profiles:", error);
     }
   };
 
-  const handleCreateOrUpdateCategoryProd = async (values: CategoryProd) => {
+  const handleCreateOrUpdateUserProfile = async (values: UserProfile) => {
     try {
       if (editingId) {
-        await productService.updateCategory(editingId, values);
+        await userService.updateUserProfile(editingId, values);
       } else {
-        await productService.createCategory(values);
+        await userService.createUserProfile(values);
       }
-      fetchCategories();
+      fetchUserProfile();
       formik.resetForm();
       setEditingId(null);
     } catch (error) {
@@ -94,40 +105,30 @@ export const ManageCategory = () => {
     setOpenSnackbar(true);
   };
 
-  const openConfirmDialog = (categoryId: number) => {
-    setSelectedCategoryId(categoryId);
-    setConfirmDialogOpen(true);
-  };
-
-  const closeConfirmDialog = () => {
-    setSelectedCategoryId(null);
-    setConfirmDialogOpen(false);
-  };
-
   const handleDelete = async () => {
-    if (selectedCategoryId !== null) {
+    if (selectedUserProfileId !== null) {
       try {
-        await productService.deleteCategory(selectedCategoryId);
-        fetchCategories();
+        await userService.deleteUserProfile(selectedUserProfileId);
+        fetchUserProfile();
         closeConfirmDialog();
       } catch (error) {
-        console.error("Failed to delete category:", error);
+        console.error("Failed to delete user profile:", error);
       }
     }
   };
 
-  const handleEdit = (categoryprod: CategoryProd) => {
-    setEditingId(categoryprod.id ?? null);
+  const handleEdit = (userProfile: UserProfile) => {
+    setEditingId(userProfile.id ?? null);
     formik.setValues({
-      description: categoryprod.description,
-      status: categoryprod.status ?? true,
+      name: userProfile.name,
+      status: userProfile.status ?? true,
     });
   };
 
   const validate = () => {
-    const newErrors: { description?: string } = {};
-    if (!formik.values.description) {
-      newErrors.description = "Informe a categoria para cadastro";
+    const newErrors: { name?: string } = {};
+    if (!formik.values.name) {
+      newErrors.name = "Informe o perfil de usuário para cadastro";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -137,21 +138,21 @@ export const ManageCategory = () => {
     e.preventDefault();
     if (validate()) {
       try {
-        await handleCreateOrUpdateCategoryProd(formik.values);
-        showSnackbar("Categoria cadastrada com sucesso!", "success");
+        await handleCreateOrUpdateUserProfile(formik.values);
+        showSnackbar("Perfil de usuário cadastrado com sucesso!", "success");
         formik.resetForm();
       } catch (error) {
-        showSnackbar("Erro ao cadastrar a categoria.", "error");
+        showSnackbar("Erro ao cadastrar o perfil de usuário.", "error");
       }
     } else {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        form: "Erro ao cadastrar a categoria.",
+        form: "Erro ao cadastrar o perfil de usuário.",
       }));
     }
   };
 
-  const handleRequestSort = (property: keyof CategoryProd) => {
+  const handleRequestSort = (property: keyof UserProfile) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -168,14 +169,12 @@ export const ManageCategory = () => {
     setPage(0);
   };
 
-  const filteredAndSortedCategories = React.useMemo(() => {
-    return [...categories]
+  const filteredAndSortedUserProfile = React.useMemo(() => {
+    return [...userProfile]
       .filter(
-        (categoryprod) =>
-          categoryprod.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          (categoryprod.status ? "ativo" : "inativo").includes(
+        (userProfile) =>
+          userProfile.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (userProfile.status ? "ativo" : "inativo").includes(
             searchTerm.toLowerCase()
           )
       )
@@ -192,15 +191,15 @@ export const ManageCategory = () => {
           return b[orderBy] < a[orderBy] ? -1 : 1;
         }
       });
-  }, [categories, order, orderBy, searchTerm]);
+  }, [userProfile, order, orderBy, searchTerm]);
 
   const formik = useFormik({
     initialValues: {
-      description: "",
+      name: "",
       status: true,
     },
     validationSchema: validationSchema,
-    onSubmit: handleCreateOrUpdateCategoryProd,
+    onSubmit: handleCreateOrUpdateUserProfile,
   });
 
   return (
@@ -222,8 +221,8 @@ export const ManageCategory = () => {
             sx={{ mb: 3, textAlign: "center" }}
           >
             {editingId
-              ? "Editar Categoria de Produto"
-              : "Cadastro de Categorias de Produto"}
+              ? "Editar Perfil de Usuário"
+              : "Cadastro de Perfis de Usuário"}
           </Typography>
 
           <form onSubmit={formik.handleSubmit}>
@@ -231,13 +230,13 @@ export const ManageCategory = () => {
               <Grid item xs={12} sm={10}>
                 <TextField
                   fullWidth
-                  id="description"
-                  name="description"
+                  id="name"
+                  name="name"
                   label="Descrição"
-                  value={formik.values.description}
+                  value={formik.values.name}
                   onChange={formik.handleChange}
-                  error={Boolean(!!errors.description)}
-                  helperText={errors.description}
+                  error={Boolean(!!errors.name)}
+                  helperText={errors.name}
                 />
               </Grid>
               <Grid item xs={12} sm={2}>
@@ -276,7 +275,7 @@ export const ManageCategory = () => {
           <TextField
             fullWidth
             id="search"
-            label="Buscar categorias"
+            label="Buscar perfis de usuário"
             variant="outlined"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -289,9 +288,9 @@ export const ManageCategory = () => {
                 <TableRow>
                   <TableCell>
                     <TableSortLabel
-                      active={orderBy === "description"}
-                      direction={orderBy === "description" ? order : "asc"}
-                      onClick={() => handleRequestSort("description")}
+                      active={orderBy === "name"}
+                      direction={orderBy === "name" ? order : "asc"}
+                      onClick={() => handleRequestSort("name")}
                     >
                       Descrição
                     </TableSortLabel>
@@ -309,22 +308,22 @@ export const ManageCategory = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredAndSortedCategories
+                {filteredAndSortedUserProfile
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((categoryprod) => (
-                    <TableRow key={categoryprod.id}>
-                      <TableCell>{categoryprod.description}</TableCell>
+                  .map((userProfile) => (
+                    <TableRow key={userProfile.id}>
+                      <TableCell>{userProfile.name}</TableCell>
                       <TableCell>
-                        {categoryprod.status ? "Ativo" : "Inativo"}
+                        {userProfile.status ? "Ativo" : "Inativo"}
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton onClick={() => handleEdit(categoryprod)}>
+                        <IconButton onClick={() => handleEdit(userProfile)}>
                           <EditIcon />
                         </IconButton>
                         <IconButton
                           onClick={() =>
-                            categoryprod.id !== undefined &&
-                            openConfirmDialog(categoryprod.id)
+                            userProfile.id !== undefined &&
+                            openConfirmDialog(userProfile.id)
                           }
                         >
                           <DeleteIcon />
@@ -337,7 +336,7 @@ export const ManageCategory = () => {
             <TablePagination
               rowsPerPageOptions={[10, 20]}
               component="div"
-              count={filteredAndSortedCategories.length}
+              count={filteredAndSortedUserProfile.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
@@ -359,7 +358,7 @@ export const ManageCategory = () => {
         <ConfirmationDialog
           open={confirmDialogOpen}
           title="Confirmar Exclusão"
-          message="Tem certeza que deseja excluir esta categoria?"
+          message="Tem certeza que deseja excluir este perfil de usuário?"
           onConfirm={handleDelete}
           onCancel={closeConfirmDialog}
         />

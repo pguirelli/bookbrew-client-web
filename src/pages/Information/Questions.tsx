@@ -1,32 +1,17 @@
 import React from "react";
 import {
   Box,
-  Container,
-  Typography,
   Paper,
+  Typography,
+  Container,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Grid,
-  Link,
 } from "@mui/material";
+import { useAuthContext } from "../../contexts/AuthContext.tsx";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
-const SectionTitle = ({ children }) => (
-  <Box
-    sx={{
-      backgroundColor: "#1976d2",
-      color: "#ffffff",
-      p: 2,
-      borderRadius: 1,
-      mb: 2,
-    }}
-  >
-    <Typography variant="h6" component="h2">
-      {children}
-    </Typography>
-  </Box>
-);
+import { Footer } from "../../pages/Components/Footer.tsx";
+import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
 
 const faqData = [
   {
@@ -56,109 +41,67 @@ const faqData = [
   },
 ];
 
-const Footer = () => (
-  <Box
-    component="footer"
-    sx={{
-      py: 3,
-      px: 2,
-      mt: "auto",
-      backgroundColor: (theme) => theme.palette.grey[200],
-    }}
-  >
-    <Container maxWidth="lg">
-      <Grid container spacing={4}>
-        <Grid item xs={12} sm={4}>
-          <Typography variant="h6" color="text.primary" gutterBottom>
-            Sobre a BookBrew
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Sua loja especializada em livros, cafés, perfumes e bebidas.
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Typography variant="h6" color="text.primary" gutterBottom>
-            Contato
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Email: contato@bookbrew.com
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Tel: (11) 1234-5678
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Typography variant="h6" color="text.primary" gutterBottom>
-            Redes Sociais
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Instagram • Facebook • Twitter
-          </Typography>
-        </Grid>
-      </Grid>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        align="center"
-        sx={{ mt: 2 }}
-      >
-        © 2024 BookBrew. Todos os direitos reservados.
-      </Typography>
-    </Container>
-  </Box>
-);
-
 export const Questions = () => {
+  const { isAuthenticated, user, logout } = useAuthContext();
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "#f0f4f8",
-      }}
-    >
-      <Container maxWidth="lg" sx={{ mt: 4 }} >
-        <Paper
-          elevation={3}
-          sx={{ p: 4, mb: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
-        >
-          <Typography
-            variant="h4"
-            component="h1"
-            gutterBottom
-            sx={{ textAlign: "center", color: "#1976d2" }}
+    <Box sx={{ flexGrow: 1 }}>
+      <MenuItemsSummCustomer
+        user={user}
+        isAuthenticated={isAuthenticated}
+        logout={logout}
+      />
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          backgroundColor: "#f0f4f8",
+        }}
+      >
+        <Container maxWidth="lg" sx={{ mt: 10 }}>
+          <Paper
+            elevation={3}
+            sx={{ p: 4, mb: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
           >
-            Perguntas Frequentes
-          </Typography>
-        </Paper>
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            width: "100%",
-            maxWidth: 800,
-            margin: "0 auto",
-            backgroundColor: "#ffffff",
-            mb: 4,
-            mt: 2
-          }}
-        >
-          {faqData.map((item, index) => (
-            <Accordion key={index} sx={{ mb: 2 }}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                sx={{ backgroundColor: "#1976d2", color: "#ffffff" }}
-              >
-                <Typography>{item.question}</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography>{item.answer}</Typography>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Paper>
-      </Container>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ textAlign: "center", color: "#1976d2" }}
+            >
+              Perguntas Frequentes
+            </Typography>
+          </Paper>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 4,
+              width: "100%",
+              maxWidth: 800,
+              margin: "0 auto",
+              backgroundColor: "#ffffff",
+              mb: 4,
+              mt: 2,
+            }}
+          >
+            {faqData.map((item, index) => (
+              <Accordion key={index} sx={{ mb: 2 }}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={{ backgroundColor: "#1976d2", color: "#ffffff" }}
+                >
+                  <Typography>{item.question}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Typography>{item.answer}</Typography>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Paper>
+        </Container>
+      </Box>
       <Footer />
     </Box>
   );

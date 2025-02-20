@@ -7,8 +7,9 @@ import { ChangePassword } from "./pages/Authentication/ChangePassword.tsx";
 import { ResetPassword } from "./pages/Authentication/ResetPassword.tsx";
 import { RegisterCustomer } from "./pages/Register/RegisterCustomer.tsx";
 import { RegisterUser } from "./pages/Register/RegisterUser.tsx";
-import { UserProfile } from "./pages/Register/UserProfile.tsx";
+import { ManageUserProfile } from "./pages/Register/ManageUserProfile.tsx";
 import { ManageCustomer } from "./pages/Register/ManageCustomer.tsx";
+import { CustomerProfile } from "./pages/Register/CustomerProfile.tsx";
 import { ManageUser } from "./pages/Register/ManageUser.tsx";
 import { ManageBrand } from "./pages/Product/ManageBrand.tsx";
 import { ManageCategory } from "./pages/Product/ManageCategory.tsx";
@@ -41,7 +42,8 @@ function App() {
           <Route path="/success" element={<Success />} />
           <Route path="/register-customer" element={<RegisterCustomer />} />
           <Route path="/register-user" element={<RegisterUser />} />
-          <Route path="/user-profile" element={<UserProfile />} />
+          <Route path="/user-profile" element={<ManageUserProfile />} />
+          <Route path="/customer-profile" element={<CustomerProfile />} />
           <Route path="/manage-customer" element={<ManageCustomer />} />
           <Route path="/manage-user" element={<ManageUser />} />
           <Route path="/manage-brand" element={<ManageBrand />} />
@@ -58,15 +60,11 @@ function App() {
           <Route path="/manage-order" element={<ManageOrder />} />
           <Route path="/customer-orders" element={<CustomerOrders />} />
           <Route path="/" element={<Shopping />} />
-          <Route
-            path="/product/:id"
-            element={<ProductView />}
-          />
+          <Route path="/product/:id" element={<ProductView />} />
 
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/questions" element={<Questions />} />
-
         </Routes>
       </BrowserRouter>
     </AuthProvider>

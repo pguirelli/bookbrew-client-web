@@ -108,17 +108,19 @@ export const productService = {
         const promotions = await productService.getProductPromotions(
           product.id!
         );
-        console.log("Products fetched from API:", promotions); // Adiciona log aqui
 
         const discountPercentage =
           promotions.length > 0 ? promotions[0].discountPercentage : 0;
         return { ...product, discountPercentage };
       })
     );
-    console.log("Products fetched from API:", response.data); // Adiciona log aqui
-    console.log("Products fetched from API:", productsWithDiscounts); // Adiciona log aqui
 
     return productsWithDiscounts;
+  },
+
+  getProduct: async (id: number): Promise<Product> => {
+    const response = await axios.get(`${API_URL}/products/${id}`);
+    return response.data;
   },
 
   getProductById: async (
@@ -129,11 +131,9 @@ export const productService = {
 
     // Busque as promoções e inclua o percentual de desconto
     const promotions = await productService.getProductPromotions(product.id!);
-    console.log("Promotions fetched for product:", promotions); // Adiciona log aqui
 
     const discountPercentage =
       promotions.length > 0 ? promotions[0].discountPercentage : 0;
-    console.log("Discount Percentage for product:", discountPercentage); // Adiciona log aqui
 
     return { ...product, discountPercentage };
   },
@@ -181,19 +181,13 @@ export const productService = {
     return response.data;
   },
 
-  createProductImage: async (
-    productImageDTO: ProductImageDTO
-  ): Promise<ProductImagesSearchDTO> => {
-    const formData = new FormData();
-    formData.append("description", productImageDTO.description);
-    formData.append("image", productImageDTO.image);
-    formData.append("productId", productImageDTO.productId.toString());
+  createProductImage: async (data: FormData): Promise<ProductImage> => {
+    const response = await axios.post<ProductImage>(
+      `${API_URL_PRODUCTS}/images`,
+      data,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
 
-    const response = await axios.post(`${API_URL_PRODUCTS}/images`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
     return response.data;
   },
 

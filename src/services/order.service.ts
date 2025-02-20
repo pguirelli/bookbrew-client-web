@@ -9,7 +9,7 @@ import {
 
 const API_URL = "http://localhost:8081/bff";
 
-const OrderService = {
+export const orderService = {
   // Order endpoints
   createOrder: async (orderRequest: OrderRequestDTO): Promise<OrderDTO> => {
     const response = await axios.post(`${API_URL}/orders`, orderRequest);
@@ -18,6 +18,11 @@ const OrderService = {
 
   getAllOrders: async (): Promise<OrderDTO[]> => {
     const response = await axios.get(`${API_URL}/orders`);
+    return response.data;
+  },
+
+  getOrdersByCustomer: async (id: number): Promise<OrderDTO[]> => {
+    const response = await axios.get(`${API_URL}/orders/customer/${id}`);
     return response.data;
   },
 
@@ -89,6 +94,11 @@ const OrderService = {
     return response.data;
   },
 
+  getReviewsByUser: async (id: number): Promise<ProductReviewDTO[]> => {
+    const response = await axios.get(`${API_URL}/reviews/user/${id}`);
+    return response.data;
+  },
+
   getReviewsByProduct: async (
     productId: number
   ): Promise<ProductReviewDTO[]> => {
@@ -115,5 +125,3 @@ const OrderService = {
     await axios.delete(`${API_URL}/reviews/${id}`);
   },
 };
-
-export default OrderService;
