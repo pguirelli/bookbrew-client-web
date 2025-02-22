@@ -28,10 +28,14 @@ import { AboutUs } from "./pages/Information/AboutUs.tsx";
 import { Contact } from "./pages/Information/Contact.tsx";
 import { Questions } from "./pages/Information/Questions.tsx";
 import { ProductView } from "./pages/Shopping/ProductView.tsx";
+import { Cart } from "./pages/Shopping/Cart.tsx";
+import { CartProvider } from './contexts/CartProvider.tsx';
+
 
 function App() {
   return (
     <AuthProvider>
+      <CartProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -60,13 +64,16 @@ function App() {
           <Route path="/manage-order" element={<ManageOrder />} />
           <Route path="/customer-orders" element={<CustomerOrders />} />
           <Route path="/" element={<Shopping />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductView />} />
 
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/questions" element={<Questions />} />
         </Routes>
+        
       </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
   );
 }

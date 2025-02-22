@@ -43,14 +43,14 @@ export interface PaymentDTO {
   paymentMethod: string;
   status: string;
   transactionCode: string;
-  paymentDate: string;
+  paymentDate?: string;
 }
 
 export interface OrderDTO {
   id?: number;
   customerId: number;
   orderDate: string;
-  status: string;
+  status?: string;
   orderItems: OrderItemDTO[];
   subTotal: number;
   itemCount: number;
