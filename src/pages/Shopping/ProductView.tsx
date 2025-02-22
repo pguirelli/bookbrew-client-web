@@ -20,6 +20,7 @@ import { MenuItemsManagement } from "../../pages/Components/MenuItemsManagement.
 import { Footer } from "../../pages/Components/Footer.tsx";
 import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
 import { base64ToBlob } from "../../pages/Components/FunctionToConvertBase64Blob.tsx";
+import { useCart } from '../../contexts/CartProvider.tsx';
 
 function discountedPrice(price: number, discountPercentage: number): number {
   return price * (1 - discountPercentage / 100);
@@ -35,6 +36,7 @@ export const ProductView: React.FC = () => {
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { state, addItemToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -58,8 +60,14 @@ export const ProductView: React.FC = () => {
     setAnchorEl(null);
   };
 
+
+
   const addToCart = (product: Product) => {
     setCartItems([...cartItems, product]);
+  };
+
+  const handleAddToCart = (product: Product) => {
+    addItemToCart(product);
   };
 
   const navigateToCheckout = () => {
@@ -265,7 +273,7 @@ export const ProductView: React.FC = () => {
                           backgroundColor: "#34e8eb",
                         },
                       }}
-                      onClick={() => product && addToCart(product)}
+                      onClick={() => product && handleAddToCart(product)}
                     >
                       Adicionar ao Carrinho
                     </Button>

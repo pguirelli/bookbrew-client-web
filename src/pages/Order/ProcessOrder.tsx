@@ -296,29 +296,7 @@ export const ProcessOrder = () => {
     }
   };
 
-  /*
-  // Add this function inside RegisterOrder component
-  const filterOrders = () => {
-    return orders.filter((order) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        //order.customerId. .customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order?.id?.toString().includes(searchTerm);
-
-      const matchesFilter = filterType === "all" || order.status === filterType;
-
-      const matchesDate =
-        !dateRange.start ||
-        !dateRange.end ||
-        (new Date(order.orderDate) >= new Date(dateRange.start) &&
-          new Date(order.orderDate) <= new Date(dateRange.end));
-
-      return matchesSearch && matchesFilter && matchesDate;
-    });
-  };
-*/
-
-  const handleUpdateStatus = (order: OrderDTO, newStatus: string) => {
+ const handleUpdateStatus = (order: OrderDTO, newStatus: string) => {
     const statusMessages: { [key: string]: string } = {
       PREPARANDO: "preparar",
       ENVIADO: "enviar",

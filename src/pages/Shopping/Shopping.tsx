@@ -49,6 +49,7 @@ import { CategoryProd } from "../../types/product.types";
 import { MenuItemsManagement } from "../../pages/Components/MenuItemsManagement.tsx";
 import { Footer } from "../../pages/Components/Footer.tsx";
 import { base64ToBlob } from "../../pages/Components/FunctionToConvertBase64Blob.tsx";
+import { useCart } from '../../contexts/CartProvider.tsx';
 
 function discountedPrice(price: number, discount: number): number {
   if (discount > 0) {
@@ -60,6 +61,7 @@ function discountedPrice(price: number, discount: number): number {
 
 export const Shopping = () => {
   const navigate = useNavigate();
+  const { state, addItemToCart } = useCart();
   const { isAuthenticated, user, logout } = useAuthContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -122,6 +124,7 @@ export const Shopping = () => {
     fetchBrands();
   }, []);
 
+  
   useEffect(() => {
     const fetchCategories = async () => {
       const fetchedCategories = await productService.getAllCategories();
@@ -154,6 +157,11 @@ export const Shopping = () => {
     return <div>{error}</div>; // Exibe a mensagem de erro
   }
 
+  const handleAddToCart = (product: Product) => {
+    setCartItems([...cartItems, product]);
+    addItemToCart(product);
+  };
+
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -172,7 +180,7 @@ export const Shopping = () => {
 
   const navigateToCheckout = () => {
     if (cartItems.length > 0) {
-      navigate("/order");
+      navigate("/cart");
     }
   };
 
@@ -597,7 +605,7 @@ export const Shopping = () => {
                           backgroundColor: "#34e8eb",
                         },
                       }}
-                      onClick={() => addToCart(product)}
+                      onClick={() => handleAddToCart(product)}
                     >
                       Adicionar ao Carrinho
                     </Button>
