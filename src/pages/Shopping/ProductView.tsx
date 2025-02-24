@@ -9,18 +9,16 @@ import {
   Button,
   TextField,
   Box,
-  Menu,
 } from "@mui/material";
 import { ShoppingCart } from "@mui/icons-material";
 import ImageCarousel from "../../pages/Shopping/ImageCarousel.tsx";
 import { useAuthContext } from "../../contexts/AuthContext.tsx";
 import { Product } from "../../types/product.types.ts";
 import { productService } from "../../services/product.service.ts";
-import { MenuItemsManagement } from "../../pages/Components/MenuItemsManagement.tsx";
 import { Footer } from "../../pages/Components/Footer.tsx";
 import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
 import { base64ToBlob } from "../../pages/Components/FunctionToConvertBase64Blob.tsx";
-import { useCart } from '../../contexts/CartProvider.tsx';
+import { useCart } from "../../contexts/CartProvider.tsx";
 
 function discountedPrice(price: number, discountPercentage: number): number {
   return price * (1 - discountPercentage / 100);
@@ -35,7 +33,6 @@ export const ProductView: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuthContext();
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { state, addItemToCart } = useCart();
 
   useEffect(() => {
@@ -45,7 +42,6 @@ export const ProductView: React.FC = () => {
           const fetchedProduct = await productService.getProductById(
             Number(id)
           );
-          console.log("Fetched Product:", fetchedProduct);
           setProduct(fetchedProduct);
         } catch (error) {
           console.error("Error fetching product:", error);
@@ -55,16 +51,6 @@ export const ProductView: React.FC = () => {
 
     fetchProduct();
   }, [id]);
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-
-
-  const addToCart = (product: Product) => {
-    setCartItems([...cartItems, product]);
-  };
 
   const handleAddToCart = (product: Product) => {
     addItemToCart(product);
@@ -84,33 +70,40 @@ export const ProductView: React.FC = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
       >
-        <MenuItemsManagement
+        <MenuItemsSummCustomer
           user={user}
           isAuthenticated={isAuthenticated}
           logout={logout}
         />
-      </Menu>
+      </Box>
       return (
       <Box
         sx={{
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
-          backgroundColor: "#f0f4f8",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
         }}
       >
-        <Container sx={{ mt: 10, mb: 4 }}>
+        <Container sx={{ mt: 4, mb: 4 }}>
           <Grid
             container
             spacing={4}
@@ -187,7 +180,6 @@ export const ProductView: React.FC = () => {
                               product.price,
                               product.discountPercentage ?? 0
                             ).toFixed(2)}{" "}
-                            {/* Preço com desconto */}
                           </Typography>
                           <Box
                             display="flex"
@@ -196,7 +188,6 @@ export const ProductView: React.FC = () => {
                             justifyContent="center"
                           >
                             {" "}
-                            {/* Exibe horizontalmente */}
                             <Typography
                               align="center"
                               variant="h6"
@@ -212,7 +203,6 @@ export const ProductView: React.FC = () => {
                               gutterBottom
                             >
                               R$ {product.price.toFixed(2)}{" "}
-                              {/* Preço original riscado */}
                             </Typography>
                           </Box>
                         </>
@@ -224,7 +214,6 @@ export const ProductView: React.FC = () => {
                           gutterBottom
                         >
                           R$ {product.price.toFixed(2)}{" "}
-                          {/* Preço sem desconto */}
                         </Typography>
                       )}
                       <Typography

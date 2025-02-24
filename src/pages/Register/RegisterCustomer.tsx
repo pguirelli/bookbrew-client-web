@@ -86,7 +86,7 @@ export const RegisterCustomer = () => {
           formik.setFieldError("addresses", "Adicione pelo menos um endereço");
           return;
         }
-        console.log("1 Register:", values);
+
         const customerRequest = {
           name: values.name,
           lastName: values.lastName,
@@ -98,10 +98,12 @@ export const RegisterCustomer = () => {
           addresses: values.addresses,
         };
 
-        console.log("2 Register:", values);
         await customerService.createCustomer(customerRequest);
-        console.log("3 Register:", values);
-        showSnackbar("Cliente cadastrado com sucesso! Você será redirecionado para tela de login.", "success");
+
+        showSnackbar(
+          "Cliente cadastrado com sucesso! Você será redirecionado para tela de login.",
+          "success"
+        );
         formik.resetForm();
         setTimeout(() => {
           navigate("/login");
@@ -258,7 +260,10 @@ export const RegisterCustomer = () => {
               </Grid>
 
               <Grid item xs={12}>
-                <AddressList addresses={formik.values.addresses} formik={formik} />
+                <AddressList
+                  addresses={formik.values.addresses}
+                  formik={formik}
+                />
                 {formik.touched.addresses &&
                   formik.errors.addresses &&
                   typeof formik.errors.addresses === "string" && (

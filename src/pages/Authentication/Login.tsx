@@ -38,7 +38,7 @@ export const Login = () => {
               id: response.profile.id,
               name: response.profile.name,
               status: response.profile.status,
-            }
+            },
           };
           login(userData);
           navigate("/");

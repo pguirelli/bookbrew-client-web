@@ -25,7 +25,11 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
 }) => {
   return (
     <Dialog open={open} onClose={onCancel}>
-      <DialogTitle style={{ background: '#1976d2', color: 'white', marginBottom: 15}}>{title}</DialogTitle>
+      <DialogTitle
+        style={{ background: "#1976d2", color: "white", marginBottom: 15 }}
+      >
+        {title}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>{message}</DialogContentText>
       </DialogContent>

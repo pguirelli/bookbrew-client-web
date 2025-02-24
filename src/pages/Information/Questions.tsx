@@ -45,22 +45,39 @@ export const Questions = () => {
   const { isAuthenticated, user, logout } = useAuthContext();
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "5.2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
 
       <Box
         sx={{
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
-          backgroundColor: "#f0f4f8",
+          alignItems: "center",
+          pb: "80px",
         }}
       >
-        <Container maxWidth="lg" sx={{ mt: 10 }}>
+        <Container maxWidth="lg">
           <Paper
             elevation={3}
             sx={{ p: 4, mb: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}

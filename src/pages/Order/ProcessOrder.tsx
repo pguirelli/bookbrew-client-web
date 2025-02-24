@@ -32,7 +32,7 @@ import {
   Check,
   Cancel,
 } from "@mui/icons-material";
-import { SelectChangeEvent } from '@mui/material/Select';
+import { SelectChangeEvent } from "@mui/material/Select";
 import SearchIcon from "@mui/icons-material/Search";
 import { Footer } from "../../pages/Components/Footer.tsx";
 import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
@@ -63,7 +63,6 @@ export const ProcessOrder = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [trackingCode, setTrackingCode] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [shippingDialogOpen, setShippingDialogOpen] = useState(false);
   const [customers, setCustomers] = useState<Map<number, Customer>>(new Map());
@@ -105,7 +104,6 @@ export const ProcessOrder = () => {
   ) => {
     let filtered = orders;
 
-    // Aplicar filtro de pesquisa
     if (search) {
       filtered = filtered.filter(
         (order) =>
@@ -114,12 +112,10 @@ export const ProcessOrder = () => {
       );
     }
 
-    // Aplicar filtro de status
     if (status !== "ALL") {
       filtered = filtered.filter((order) => order.status === status);
     }
 
-    // Aplicar filtro de data
     if (dateRange.start && dateRange.end) {
       const startDate = new Date(dateRange.start);
       const endDate = new Date(dateRange.end);
@@ -174,7 +170,6 @@ export const ProcessOrder = () => {
         });
       } catch (error) {
         console.error("Error fetching orders:", error);
-        // Add error handling/notification here
       } finally {
         setLoading(false);
       }
@@ -183,17 +178,7 @@ export const ProcessOrder = () => {
     fetchOrders();
   }, []);
 
-  const handleOpenDialog = (order: OrderDTO) => {
-    setSelectedOrder(order);
-    setDialogOpen(true);
-  };
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleOpenOrderDetails = (order: OrderDTO) => {
-    setSelectedOrder(order);
-    setIsDialogOpen(true);
-  };
 
   const handleCloseOrderDetails = () => {
     setIsDialogOpen(false);
@@ -226,7 +211,7 @@ export const ProcessOrder = () => {
   };
 
   const getStatusColor = (order: OrderDTO) => {
-    const status = getStatusFromLabel(order.status);
+    const status = getStatusFromLabel(order?.status ?? "");
 
     const colors = {
       pending: "warning",
@@ -236,11 +221,11 @@ export const ProcessOrder = () => {
       cancelled: "error",
     } as const;
 
-    return colors[status] || "gray";
+    return colors[status as keyof typeof colors] || "gray";
   };
 
   const getStatusLabel = (order: OrderDTO) => {
-    const status = getStatusFromLabel(order.status);
+    const status = getStatusFromLabel(order?.status ?? "");
     const labels = {
       pending: "AGUARDANDO PAGAMENTO",
       processing: "PREPARANDO",
@@ -249,7 +234,7 @@ export const ProcessOrder = () => {
       cancelled: "CANCELADO",
     };
 
-    return labels[status] || "DESCONHECIDO";
+    return labels[status as keyof typeof labels] || "DESCONHECIDO";
   };
 
   const handleShipOrder = (order: OrderDTO) => {
@@ -296,7 +281,7 @@ export const ProcessOrder = () => {
     }
   };
 
- const handleUpdateStatus = (order: OrderDTO, newStatus: string) => {
+  const handleUpdateStatus = (order: OrderDTO, newStatus: string) => {
     const statusMessages: { [key: string]: string } = {
       PREPARANDO: "preparar",
       ENVIADO: "enviar",
@@ -311,13 +296,6 @@ export const ProcessOrder = () => {
       message: `Deseja ${statusMessages[newStatus]} este pedido?`,
       onConfirm: async () => {
         try {
-          console.log("order", order);
-          console.log("newStatus", newStatus);
-          console.log("customerId", order.customerId);
-          console.log("orderItems", order.orderItems);
-          console.log("payment", order.payment);
-          console.log("deliveryAddress", order.addressId);
-
           await orderService.updateOrder(order?.id ?? 0, {
             customerId: order.customerId,
             orderItems: order.orderItems,
@@ -326,26 +304,23 @@ export const ProcessOrder = () => {
             deliveryAddress: order.addressId,
             promotionIds: [],
           });
-          // Atualiza a lista de pedidos
+
           setOrders(
             orders.map((o) =>
               o.id === order.id ? { ...o, status: newStatus } : o
             )
           );
-          // Fecha o diálogo
+
           setConfirmDialog((prev) => ({ ...prev, open: false }));
           setShippingDialogOpen(false);
         } catch (error) {
           console.error("Erro ao atualizar status:", error);
-          // Adicione aqui tratamento de erro (ex: notificação)
         }
       },
     });
   };
 
   const handleViewOrder = (order: OrderDTO) => {
-    console.log("Ordem selecionada:", order); // Debug
-
     setSelectedOrder(order);
     setViewDialogOpen(true);
   };
@@ -386,7 +361,6 @@ export const ProcessOrder = () => {
     return (
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
-          {/* Botão de Visualização - sempre visível */}
           <IconButton
             onClick={() => handleViewOrder(order)}
             color="primary"
@@ -396,7 +370,6 @@ export const ProcessOrder = () => {
             <Visibility />
           </IconButton>
 
-          {/* Botões baseados no status */}
           {order.status === "AGUARDANDO PAGAMENTO" && (
             <>
               <IconButton
@@ -499,7 +472,6 @@ export const ProcessOrder = () => {
     ) => void;
   }
 
-  // Componente ShippingDialog atualizado
   const ShippingDialog: React.FC<ShippingDialogProps> = ({
     open,
     selectedOrder,
@@ -508,7 +480,6 @@ export const ProcessOrder = () => {
   }) => {
     const [trackingCode, setTrackingCode] = useState("");
 
-    // Limpa o código de rastreio quando o diálogo é fechado
     useEffect(() => {
       if (!open) {
         setTrackingCode("");
@@ -551,24 +522,46 @@ export const ProcessOrder = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
       return (
       <Box
         sx={{
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
-          backgroundColor: "#f0f4f8",
+          alignItems: "center",
+          pb: "80px",
         }}
       >
-        <Box sx={{ p: 8 }}>
+        <Box sx={{ p: 4 }}>
           <Paper elevation={3} sx={{ p: 2 }}>
-            <Typography variant="h5" gutterBottom>
+            <Typography
+              variant="h5"
+              component="h1"
+              sx={{ mb: 3, textAlign: "center" }}
+              gutterBottom
+            >
               Gerenciar Pedidos
             </Typography>
 
@@ -597,7 +590,9 @@ export const ProcessOrder = () => {
                   label="Status"
                 >
                   <MenuItem value="ALL">TODOS</MenuItem>
-                  <MenuItem value="AGUARDANDO PAGAMENTO">AGUARDANDO PAGAMENTO</MenuItem>
+                  <MenuItem value="AGUARDANDO PAGAMENTO">
+                    AGUARDANDO PAGAMENTO
+                  </MenuItem>
                   <MenuItem value="PREPARANDO">PREPARANDO</MenuItem>
                   <MenuItem value="ENVIADO">ENVIADO</MenuItem>
                   <MenuItem value="ENTREGUE">ENTREGUE</MenuItem>
@@ -718,7 +713,6 @@ export const ProcessOrder = () => {
               </Table>
             </TableContainer>
 
-            {/* Dialogs */}
             <ConfirmationDialog
               open={confirmDialog.open}
               title={confirmDialog.title}

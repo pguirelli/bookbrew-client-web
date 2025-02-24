@@ -33,8 +33,6 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   const getStatusColor = (status: string) => {
     const statusOrder = getStatusFromLabel(status);
 
-    console.log("Status:", status);
-    console.log("Status Order:", statusOrder);
     const statusColors = {
       pending: "warning",
       processing: "info",
@@ -42,8 +40,8 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
       delivered: "success",
       cancelled: "error",
     };
-    console.log("Status Order 2:", statusOrder);
-    return statusColors[statusOrder] || "default";
+
+    return statusColors[statusOrder as keyof typeof statusColors] || "default";
   };
 
   const getStatusFromLabel = (label: string): OrderDTO["status"] => {
@@ -64,14 +62,12 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   useEffect(() => {
     if (orderData) {
       const fetchProductData = async () => {
-        setLoading(true); // Começa o carregamento
+        setLoading(true);
         try {
           const productIds = orderData.orderItems.map((item) => item.productId);
-          console.log("IDs dos produtos a serem buscados:", productIds);
 
           const productsList: Product[] = [];
 
-          // Busca os dados dos produtos
           for (const productId of productIds) {
             try {
               const productData = await productService.getProductById(
@@ -88,29 +84,17 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
             }
           }
 
-          // Atualiza o estado com os novos produtos
           setProducts(productsList);
-          console.log("Lista de produtos atualizada:", productsList);
         } catch (error) {
           console.error("Erro ao carregar dados do produto", error);
         } finally {
-          setLoading(false); // Finaliza o carregamento
+          setLoading(false);
         }
       };
 
-      fetchProductData(); // Chama a função de carregamento de dados
+      fetchProductData();
     }
   }, [orderData]);
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -119,7 +103,6 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
     }).format(value);
   };
 
-  // Exibe a mensagem de carregamento enquanto o estado products estiver vazio
   if (loading) {
     return <div>Carregando...</div>;
   }
@@ -135,7 +118,16 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
           <Typography variant="h6">Pedido #{orderData.id}</Typography>
           <Chip
             label={orderData.status}
-            color={getStatusColor(orderData.status)}
+            color={
+              getStatusColor(orderData.status ?? "") as
+                | "warning"
+                | "info"
+                | "primary"
+                | "success"
+                | "error"
+                | "default"
+                | "secondary"
+            }
             size="medium"
           />
         </Box>
@@ -143,7 +135,6 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
 
       <DialogContent>
         <Grid container spacing={3} sx={{ mt: 1 }}>
-          {/* Customer Information */}
           <Grid item xs={12}>
             <Paper elevation={0} sx={{ p: 2, bgcolor: "background.default" }}>
               <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -181,7 +172,6 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
             </Paper>
           </Grid>
 
-          {/* Order Details */}
           <Grid item xs={12}>
             <Paper elevation={0} sx={{ p: 2, bgcolor: "background.default" }}>
               <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -209,7 +199,6 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
             </Paper>
           </Grid>
 
-          {/* Items */}
           <Grid item xs={12}>
             <Paper elevation={0} sx={{ p: 2, bgcolor: "background.default" }}>
               <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -218,7 +207,6 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
               </Box>
 
               {orderData.orderItems.map((item, index) => {
-                // Procura pelo título do produto com base no item.id
                 const product = products.find(
                   (product) => product.id === (item.productId ?? 0)
                 );
@@ -236,7 +224,6 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     <Grid container spacing={2}>
                       <Grid item xs={8}>
                         <Typography>
-                          {/* Exibe o título do produto se encontrado */}
                           {product ? product.title : "Produto não encontrado"}
                         </Typography>
                       </Grid>

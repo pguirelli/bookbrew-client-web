@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,7 +11,6 @@ import {
   FormControl,
   FormLabel,
   Divider,
-  Grid,
   TextField,
   Dialog,
   SelectChangeEvent,
@@ -20,19 +19,12 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
-import { LocationOn, Payment, SettingsCellSharp } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { LocationOn } from "@mui/icons-material";
 import { Address } from "../../types/customer.types.ts";
 import { OrderRequestDTO } from "../../types/order.types.ts";
 import { OrderItemDTO } from "../../types/order.types.ts";
 import { orderService } from "../../services/order.service.ts";
-import { Product } from "../../types/product.types.ts";
-
-interface PaymentMethod {
-  id: number;
-  type: "CREDIT" | "DEBIT" | "PIX" | "MONEY";
-  label: string;
-}
 
 interface CheckoutCardProps {
   open: boolean;
@@ -58,16 +50,9 @@ function generateRandomCode(length: number): string {
   return result;
 }
 
-const paymentMethods: PaymentMethod[] = [
-  { id: 1, type: "CREDIT", label: "CARTÃO DE CRÉDITO" },
-  { id: 2, type: "DEBIT", label: "CARTÃO DE DÉBITO" },
-  { id: 3, type: "PIX", label: "PIX" },
-  { id: 4, type: "MONEY", label: "BOLETO" },
-];
-
 const PaymentCard = ({ type }: { type: "credit" | "debit" }) => {
   const [installments, setInstallments] = useState<string>("1");
-  const total = 1000; // Este valor deve vir das props ou context
+  const total = 1000;
 
   const handleInstallmentChange = (event: SelectChangeEvent<string>) => {
     setInstallments(event.target.value);
@@ -149,30 +134,6 @@ const PaymentBoleto = () => (
   </Box>
 );
 
-const PaymentCreditCard = () => (
-  <Box sx={{ mt: 2 }}>
-    <Typography variant="h6" gutterBottom>
-      Cartão de Crédito
-    </Typography>
-    <TextField
-      fullWidth
-      label="Número do Cartão"
-      margin="normal"
-      placeholder="0000 0000 0000 0000"
-    />
-    <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-      <TextField label="Validade" placeholder="MM/AA" sx={{ width: "50%" }} />
-      <TextField label="CVV" placeholder="123" sx={{ width: "50%" }} />
-    </Box>
-    <TextField
-      fullWidth
-      label="Nome no Cartão"
-      margin="normal"
-      placeholder="Como está impresso no cartão"
-    />
-  </Box>
-);
-
 export const CheckoutCard: React.FC<CheckoutCardProps> = ({
   open,
   onClose,
@@ -194,31 +155,6 @@ export const CheckoutCard: React.FC<CheckoutCardProps> = ({
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<string>("");
-
-  const handleConfirm = () => {
-    if (selectedAddress && selectedPayment) {
-      onConfirmOrder(selectedAddress, selectedPayment);
-    }
-  };
-
-  const extractOrderItems = (cartItems: Product[]): OrderItemDTO[] => {
-    return cartItems.map((item) => {
-      if (!item.id) {
-        throw new Error("Product ID is required");
-      }
-
-      return {
-        productId: item.id, // Agora TypeScript sabe que item.id não é undefined
-        quantity: item.salesQuantity || 1,
-        price: item.price,
-        discountValue: (item.price * (item.discountPercentage || 0)) / 100,
-        totalPrice:
-          item.price *
-          (item.salesQuantity || 1) *
-          (1 - (item.discountPercentage || 0) / 100),
-      };
-    });
-  };
 
   const convertToOrderItems = (): OrderItemDTO[] => {
     const storedItems = JSON.parse(localStorage.getItem("itemsOrder") || "[]");
@@ -265,7 +201,6 @@ export const CheckoutCard: React.FC<CheckoutCardProps> = ({
 
   const handleConfirmOrder = async () => {
     setIsLoading(true);
-    console.log("localStorage", localStorage);
 
     if (!selectedAddress || !selectedPayment) {
       showSnackbar("Selecione endereço e forma de pagamento!", "error");
@@ -287,36 +222,27 @@ export const CheckoutCard: React.FC<CheckoutCardProps> = ({
         paymentMethod: selectedPayment,
       };
 
-      // Aguarda a criação do pedido
       const response = await orderService.createOrder(
         convertToOrderRequestDTO(order)
       );
 
       if (response) {
-        console.log("Pedido criado com sucesso");
         localStorage.removeItem("cart");
         localStorage.removeItem("itemsOrder");
-        console.log("localStorage após limpeza:", localStorage);
 
-        onOrderComplete(); // Limpa o carrinho
+        onOrderComplete();
 
-        // Notifica sucesso e fecha
         onCheckoutControl(true);
         onClose();
 
-        // Redireciona após delay
         setTimeout(() => {
           navigate("/");
-        }, 2000); // Reduzido para 2 segundos
+        }, 2000);
       }
     } catch (error) {
       console.error("Erro na operação:", error);
       showSnackbar("Erro ao efetuar o pedido!", "error");
     }
-  };
-
-  const handleAddressChange = (event: SelectChangeEvent<string>) => {
-    setSelectedAddress(Number(event.target.value));
   };
 
   const handlePaymentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -355,7 +281,6 @@ export const CheckoutCard: React.FC<CheckoutCardProps> = ({
             Finalizar Pedido
           </Typography>
 
-          {/* Seleção de Endereço */}
           <Box sx={{ mb: 4 }}>
             <Typography
               variant="h6"
@@ -383,7 +308,6 @@ export const CheckoutCard: React.FC<CheckoutCardProps> = ({
 
           <Divider sx={{ my: 3 }} />
 
-          {/* Seleção de Pagamento */}
           <Box sx={{ mb: 3 }}>
             <FormControl component="fieldset">
               <FormLabel component="legend">Forma de Pagamento</FormLabel>
@@ -415,7 +339,6 @@ export const CheckoutCard: React.FC<CheckoutCardProps> = ({
             <Box sx={{ mt: 2, mb: 2 }}>{renderPaymentMethod()}</Box>
           )}
 
-          {/* Botões de ação */}
           <Box
             sx={{ mt: 4, display: "flex", justifyContent: "flex-end", gap: 2 }}
           >

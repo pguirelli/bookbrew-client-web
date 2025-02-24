@@ -14,6 +14,9 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/auth.service.ts";
 import { useAuth } from "../../hooks/useAuth.ts";
+import { useAuthContext } from "../../contexts/AuthContext.tsx";
+import { Footer } from "../../pages/Components/Footer.tsx";
+import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
 
 const validationSchema = yup.object({
   currentPassword: yup.string().required("Informe a senha atual"),
@@ -32,6 +35,7 @@ export const ChangePassword = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const { getUserId } = useAuth();
   const userId = getUserId();
+  const { isAuthenticated, user, logout } = useAuthContext();
 
   useEffect(() => {
     if (!userId) {
@@ -79,117 +83,145 @@ export const ChangePassword = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        flexDirection: "column",
         minHeight: "100vh",
-        p: 3,
+        position: "relative",
       }}
     >
-      <Paper elevation={3} sx={{ p: 4, width: "100%", maxWidth: 400 }}>
-        <Typography
-          variant="h5"
-          component="h1"
-          sx={{ mb: 3, textAlign: "center" }}
-        >
-          Alterar Senha
-        </Typography>
-
-        {formik.status && (
-          <pre
-            style={{
-              color: "#d32f2f",
-              fontSize: "0.75rem",
-              fontFamily: "Roboto, Helvetica, Arial, sans-serif",
-              textAlign: "center",
-              marginBottom: "10px",
-            }}
-          >
-            {formik.status}
-          </pre>
-        )}
-        <br></br>
-        <form onSubmit={formik.handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="currentPassword"
-                name="currentPassword"
-                label="Senha Atual"
-                type="password"
-                value={formik.values.currentPassword}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.currentPassword &&
-                  Boolean(formik.errors.currentPassword)
-                }
-                helperText={
-                  formik.touched.currentPassword &&
-                  formik.errors.currentPassword
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="newPassword"
-                name="newPassword"
-                label="Nova Senha"
-                type="password"
-                value={formik.values.newPassword}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.newPassword &&
-                  Boolean(formik.errors.newPassword)
-                }
-                helperText={
-                  formik.touched.newPassword && formik.errors.newPassword
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="confirmPassword"
-                name="confirmPassword"
-                label="Confirmar Nova Senha"
-                type="password"
-                value={formik.values.confirmPassword}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.confirmPassword &&
-                  Boolean(formik.errors.confirmPassword)
-                }
-                helperText={
-                  formik.touched.confirmPassword &&
-                  formik.errors.confirmPassword
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                fullWidth
-                variant="contained"
-                type="submit"
-                sx={{ mt: 3 }}
-              >
-                Alterar Senha
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
-
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          bgcolor: "background.default",
+        }}
       >
-        <Alert severity="success" elevation={6} variant="filled">
-          Senha alterada com sucesso! Você será redirecionado para o login em 5
-          segundos.
-        </Alert>
-      </Snackbar>
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
+      return (
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 3,
+          pb: "80px",
+          overflowY: "auto",
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 4, width: "100%", maxWidth: 400 }}>
+          <Typography
+            variant="h5"
+            component="h1"
+            sx={{ mb: 3, textAlign: "center" }}
+          >
+            Alterar Senha
+          </Typography>
+
+          {formik.status && (
+            <pre
+              style={{
+                color: "#d32f2f",
+                fontSize: "0.75rem",
+                fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+                textAlign: "center",
+                marginBottom: "10px",
+              }}
+            >
+              {formik.status}
+            </pre>
+          )}
+          <br></br>
+          <form onSubmit={formik.handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="currentPassword"
+                  name="currentPassword"
+                  label="Senha Atual"
+                  type="password"
+                  value={formik.values.currentPassword}
+                  onChange={formik.handleChange}
+                  error={
+                    formik.touched.currentPassword &&
+                    Boolean(formik.errors.currentPassword)
+                  }
+                  helperText={
+                    formik.touched.currentPassword &&
+                    formik.errors.currentPassword
+                  }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="newPassword"
+                  name="newPassword"
+                  label="Nova Senha"
+                  type="password"
+                  value={formik.values.newPassword}
+                  onChange={formik.handleChange}
+                  error={
+                    formik.touched.newPassword &&
+                    Boolean(formik.errors.newPassword)
+                  }
+                  helperText={
+                    formik.touched.newPassword && formik.errors.newPassword
+                  }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  label="Confirmar Nova Senha"
+                  type="password"
+                  value={formik.values.confirmPassword}
+                  onChange={formik.handleChange}
+                  error={
+                    formik.touched.confirmPassword &&
+                    Boolean(formik.errors.confirmPassword)
+                  }
+                  helperText={
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                  }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="submit"
+                  sx={{ mt: 3 }}
+                >
+                  Alterar Senha
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        </Paper>
+
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={5000}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert severity="success" elevation={6} variant="filled">
+            Senha alterada com sucesso! Você será redirecionado para o login em
+            5 segundos.
+          </Alert>
+        </Snackbar>
+      </Box>
+      <Footer />
     </Box>
   );
 };

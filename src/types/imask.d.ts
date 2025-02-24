@@ -1,1 +1,1 @@
-declare module 'imask';
+declare module "imask";

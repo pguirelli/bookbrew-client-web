@@ -1,5 +1,4 @@
 import {
-  Delete as DeleteIcon,
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
   LocalShipping as ShippingIcon,
@@ -24,12 +23,10 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Paper,
-  TableCell,
-  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
-import { CheckCircle, Home, Package, Truck } from "lucide-react"; // Verifique se essa importação está correta
+import { CheckCircle, Home, Package, Truck } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../../contexts/AuthContext.tsx";
 import { Footer } from "../../pages/Components/Footer.tsx";
@@ -93,9 +90,6 @@ export const CustomerOrders = () => {
   useEffect(() => {
     const loadAddress = async () => {
       if (customer?.id && selectedOrder?.addressId) {
-        console.log("customerAddress:", customer);
-        console.log("selectedOrder:", selectedOrder.addressId);
-
         const addressData = await customerService.getCustomerAddressById(
           customer.id,
           selectedOrder.addressId
@@ -104,13 +98,9 @@ export const CustomerOrders = () => {
       }
     };
 
-    console.log("address:", address);
-
     if (customer && selectedOrder) {
       loadAddress();
     }
-
-    console.log("address2:", address);
   }, [customer, selectedOrder]);
 
   const handleTrackOrder = (order: OrderDTO) => {
@@ -198,14 +188,11 @@ export const CustomerOrders = () => {
 
   const handleExpandOrder = async (order: OrderDTO) => {
     try {
-      console.log("order.id:", order.id);
-      console.log("customer.id:", customer?.id);
       if (customer?.id && order.id) {
         const addressData = await customerService.getCustomerAddressById(
           customer.id,
           order.addressId
         );
-        console.log("addressData:", addressData);
         setAddress(addressData);
 
         setSelectedOrder(order);
@@ -219,21 +206,6 @@ export const CustomerOrders = () => {
   const handleCancelOrder = (order: OrderDTO) => {
     setSelectedOrder(order);
     setCancelDialogOpen(true);
-  };
-
-  const handleEditItem = (item: OrderItemDTO) => {
-    console.log("Editing item:", item);
-  };
-
-  const convertToOrderRequestDTO = (orderDTO: OrderDTO): OrderRequestDTO => {
-    return {
-      customerId: orderDTO.customerId,
-      orderItems: orderDTO.orderItems,
-      status: orderDTO.status,
-      payment: orderDTO.payment,
-      deliveryAddress: orderDTO.addressId,
-      promotionIds: [],
-    };
   };
 
   const confirmCancelOrder = () => {
@@ -250,7 +222,7 @@ export const CustomerOrders = () => {
       orderService.updateOrder(selectedOrder?.id ?? 0, {
         customerId: selectedOrder.customerId,
         orderItems: selectedOrder.orderItems,
-        status: "CANCELADO", // ou selectedOrder.status se quiser manter o status atual
+        status: "CANCELADO",
         payment: selectedOrder.payment,
         deliveryAddress: selectedOrder.addressId,
         promotionIds: [],
@@ -320,7 +292,7 @@ export const CustomerOrders = () => {
   };
 
   const getStatusColor = (order: OrderDTO) => {
-    const status = getStatusFromLabel(order.status);
+    const status = getStatusFromLabel(order.status ?? "");
 
     const colors = {
       pending: "warning",
@@ -330,11 +302,11 @@ export const CustomerOrders = () => {
       cancelled: "error",
     } as const;
 
-    return colors[status] || "gray";
+    return colors[status as keyof typeof colors] || "gray";
   };
 
   const getStatusLabel = (order: OrderDTO) => {
-    const status = getStatusFromLabel(order.status);
+    const status = getStatusFromLabel(order.status ?? "");
     const labels = {
       pending: "AGUARDANDO PAGAMENTO",
       processing: "PREPARANDO",
@@ -343,7 +315,7 @@ export const CustomerOrders = () => {
       cancelled: "CANCELADO",
     };
 
-    return labels[status] || "DESCONHECIDO";
+    return labels[status as keyof typeof labels] || "DESCONHECIDO";
   };
 
   const trackingData = [
@@ -378,29 +350,47 @@ export const CustomerOrders = () => {
   ];
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
       return (
       <Box
         sx={{
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
-          backgroundColor: "#f0f4f8",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
         }}
       >
-        <Box sx={{ p: 3 }}>
-          <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box sx={{ mt: 2 }}>
+          <Container maxWidth="lg" sx={{ mt: 2 }}>
             <Paper elevation={3} sx={{ p: 3 }}>
-              <Typography variant="h5" gutterBottom>
+              <Typography variant="h5" gutterBottom align="center">
                 Meus Pedidos
               </Typography>
 
-              <Grid container spacing={3}>
+              <Grid container spacing={3} sx={{ mt: 1 }}>
                 {orders.map((order) => (
                   <Grid item xs={12} key={order.id}>
                     <Card>
@@ -442,7 +432,9 @@ export const CustomerOrders = () => {
                             <Typography color="textSecondary">
                               Forma de Pagamento
                             </Typography>
-                            <Typography>{order.payment.paymentMethod}</Typography>
+                            <Typography>
+                              {order.payment.paymentMethod}
+                            </Typography>
                           </Grid>
                         </Grid>
                         <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
@@ -590,9 +582,7 @@ export const CustomerOrders = () => {
                                               onClick={() =>
                                                 handleRemoveItem(index)
                                               }
-                                            >
-                                              {/*<DeleteIcon />*/}
-                                            </IconButton>
+                                            ></IconButton>
                                           </ListItemSecondaryAction>
                                         </ListItem>
                                       ))}

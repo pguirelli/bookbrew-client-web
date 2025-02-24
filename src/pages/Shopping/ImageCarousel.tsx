@@ -8,7 +8,7 @@ interface ImageCarouselProps {
 }
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
-  const [activeIndex, setActiveIndex] = useState(0); 
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const arrowStyle = (direction: string): React.CSSProperties => ({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -27,7 +27,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   });
 
   const handleBeforeChange = (oldIndex: number, newIndex: number) => {
-    setActiveIndex(newIndex); // Atualiza o índice do slide ativo
+    setActiveIndex(newIndex);
   };
 
   const settings = {
@@ -36,8 +36,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
-    fade: true, // Transição suave de fade
-    arrows: true, // Ativa as setas de navegação
+    fade: true,
+    arrows: true,
     appendDots: (dots: React.ReactNode) => (
       <div
         style={{
@@ -56,7 +56,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
           width: "7px",
           height: "7px",
           borderRadius: "30%",
-          background: i === activeIndex ? "#1976d2" : "#fff", // Cor diferente para o slide ativo
+          background: i === activeIndex ? "#1976d2" : "#fff",
           border: "1px solid #000",
           margin: "0 5px",
         }}
@@ -64,7 +64,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
     ),
     prevArrow: <button style={arrowStyle("left")}>❮</button>,
     nextArrow: <button style={arrowStyle("right")}>❯</button>,
-    beforeChange: handleBeforeChange, // Atualiza o índice antes da mudança de slide
+    beforeChange: handleBeforeChange,
   };
 
   const displayImages =
@@ -98,12 +98,12 @@ const carouselContainerStyle: React.CSSProperties = {
 
 const imageStyle = {
   width: "100%",
-  height: "250px", // Defina uma altura fixa para o contêiner da imagem
-  objectFit: "cover" as const, // Garante que a imagem preencha o contêiner sem distorção
+  height: "250px",
+  objectFit: "cover" as const,
   borderRadius: "10px",
   transition: "transform 0.5s ease",
   "&:hover": {
-    transform: "scale(1.05)", // Efeito de zoom na imagem
+    transform: "scale(1.05)",
   },
 };
 

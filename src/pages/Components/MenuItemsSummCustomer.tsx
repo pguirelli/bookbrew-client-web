@@ -1,7 +1,27 @@
-import React, { useState } from 'react';
-import { Box, AppBar, Toolbar, IconButton, Typography, Button, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Menu } from '@mui/material';
-import { Menu as MenuIcon, Category, Settings, LocalShipping, Person } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Button,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Menu,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  Category,
+  Settings,
+  LocalShipping,
+  Person,
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { MenuItemsManagement } from "../../pages/Components/MenuItemsManagement.tsx";
 
 interface MenuItemsSummCustomerProps {
@@ -10,7 +30,11 @@ interface MenuItemsSummCustomerProps {
   logout: () => void;
 }
 
-export const MenuItemsSummCustomer: React.FC<MenuItemsSummCustomerProps> = ({ user, isAuthenticated, logout }) => {
+export const MenuItemsSummCustomer: React.FC<MenuItemsSummCustomerProps> = ({
+  user,
+  isAuthenticated,
+  logout,
+}) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
@@ -72,13 +96,17 @@ export const MenuItemsSummCustomer: React.FC<MenuItemsSummCustomerProps> = ({ us
           <Typography variant="h6" sx={{ flexGrow: 1, ml: 2 }}>
             BookBrew
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {isAuthenticated ? (
               <IconButton color="inherit" onClick={handleProfileMenuOpen}>
                 <Person />
               </IconButton>
             ) : (
-              <Button color="inherit" onClick={() => navigate("/login")} startIcon={<Person />}>
+              <Button
+                color="inherit"
+                onClick={() => navigate("/login")}
+                startIcon={<Person />}
+              >
                 Login
               </Button>
             )}
@@ -88,8 +116,16 @@ export const MenuItemsSummCustomer: React.FC<MenuItemsSummCustomerProps> = ({ us
       <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
         {drawerContent}
       </Drawer>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItemsManagement user={user} isAuthenticated={isAuthenticated} logout={logout} />
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItemsManagement
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
       </Menu>
     </Box>
   );

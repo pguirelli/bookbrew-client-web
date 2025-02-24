@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,8 +6,8 @@ import {
   DialogActions,
   Button,
   TextField,
-} from '@mui/material';
-import { OrderDTO } from '../../types/order.types';
+} from "@mui/material";
+import { OrderDTO } from "../../types/order.types";
 
 interface ShippingDialogProps {
   open: boolean;
@@ -41,8 +41,10 @@ export const ShippingDialog: React.FC<ShippingDialogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button 
-          onClick={() => selectedOrder?.id && onConfirmShipment(selectedOrder.id, "ENVIADO")} 
+        <Button
+          onClick={() =>
+            selectedOrder?.id && onConfirmShipment(selectedOrder.id, "ENVIADO")
+          }
           variant="contained"
           disabled={!trackingCode || !selectedOrder}
         >

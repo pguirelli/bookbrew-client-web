@@ -96,9 +96,7 @@ export const AddressList = ({
   ];
 
   const handleAddAddress = async () => {
-  
     try {
-      
       const newAddress = {
         zipCode: "",
         street: "",
@@ -125,7 +123,6 @@ export const AddressList = ({
   };
 
   const handleDeleteClick = (addressId: number | undefined, index: number) => {
-    console.log("Deleting address with ID:", addressId);
     if (addressId) {
       setAddressToDelete({ id: addressId, index });
       setOpenDialog(true);
@@ -137,11 +134,8 @@ export const AddressList = ({
   };
 
   const handleConfirmDelete = async () => {
-    console.log(addressToDelete + "   " + customerId);
-
     if (addressToDelete && customerId) {
       try {
-        console.log("CDeleting address with ID:", addressToDelete?.id);
         await customerService.deleteCustomerAddress(
           customerId,
           addressToDelete.id
@@ -157,11 +151,6 @@ export const AddressList = ({
     }
     setOpenDialog(false);
     setAddressToDelete(null);
-  };
-
-  const handleRemoveAddress = (index: number) => {
-    const newAddresses = addresses.filter((_, i) => i !== index);
-    formik.setFieldValue("addresses", newAddresses);
   };
 
   return (

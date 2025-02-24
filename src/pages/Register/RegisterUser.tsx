@@ -121,189 +121,217 @@ export const RegisterUser = () => {
   });
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
-      
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
       return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
-      <Box sx={{ mt: 4 }} />
-      <Container sx={{ mt: 10, mb: 4 }}>
-        
-        <Paper
-          elevation={3}
-          sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
-        >
-          <Typography
-            variant="h5"
-            component="h1"
-            sx={{ mb: 3, textAlign: "center" }}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
+        }}
+      >
+        <Box sx={{ mt: 1 }} />
+        <Container sx={{ mb: 4 }}>
+          <Paper
+            elevation={3}
+            sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
           >
-            Cadastro de Usuário
-          </Typography>
+            <Typography
+              variant="h5"
+              component="h1"
+              sx={{ mb: 3, textAlign: "center" }}
+            >
+              Cadastro de Usuário
+            </Typography>
 
-          <form onSubmit={formik.handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="name"
-                  name="name"
-                  label="Nome"
-                  value={formik.values.name}
-                  onChange={formik.handleChange}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="lastName"
-                  name="lastName"
-                  label="Sobrenome"
-                  value={formik.values.lastName}
-                  onChange={formik.handleChange}
-                  error={
-                    formik.touched.lastName && Boolean(formik.errors.lastName)
-                  }
-                  helperText={formik.touched.lastName && formik.errors.lastName}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="email"
-                  name="email"
-                  label="E-mail"
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="cpf"
-                  name="cpf"
-                  label="CPF"
-                  value={formik.values.cpf}
-                  onChange={formik.handleChange}
-                  error={formik.touched.cpf && Boolean(formik.errors.cpf)}
-                  helperText={formik.touched.cpf && formik.errors.cpf}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="phone"
-                  name="phone"
-                  label="Telefone"
-                  value={formik.values.phone}
-                  onChange={formik.handleChange}
-                  error={formik.touched.phone && Boolean(formik.errors.phone)}
-                  helperText={formik.touched.phone && formik.errors.phone}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl
-                  fullWidth
-                  error={
-                    formik.touched.idProfile && Boolean(formik.errors.idProfile)
-                  }
-                >
-                  <InputLabel id="profile-label">Perfil</InputLabel>
-                  <Select
-                    labelId="profile-label"
-                    id="idProfile"
-                    name="idProfile"
-                    value={formik.values.idProfile}
-                    label="Perfil"
+            <form onSubmit={formik.handleSubmit}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    id="name"
+                    name="name"
+                    label="Nome"
+                    value={formik.values.name}
                     onChange={formik.handleChange}
+                    error={formik.touched.name && Boolean(formik.errors.name)}
+                    helperText={formik.touched.name && formik.errors.name}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    id="lastName"
+                    name="lastName"
+                    label="Sobrenome"
+                    value={formik.values.lastName}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.lastName && Boolean(formik.errors.lastName)
+                    }
+                    helperText={
+                      formik.touched.lastName && formik.errors.lastName
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    id="email"
+                    name="email"
+                    label="E-mail"
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    error={formik.touched.email && Boolean(formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    id="cpf"
+                    name="cpf"
+                    label="CPF"
+                    value={formik.values.cpf}
+                    onChange={formik.handleChange}
+                    error={formik.touched.cpf && Boolean(formik.errors.cpf)}
+                    helperText={formik.touched.cpf && formik.errors.cpf}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    id="phone"
+                    name="phone"
+                    label="Telefone"
+                    value={formik.values.phone}
+                    onChange={formik.handleChange}
+                    error={formik.touched.phone && Boolean(formik.errors.phone)}
+                    helperText={formik.touched.phone && formik.errors.phone}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl
+                    fullWidth
+                    error={
+                      formik.touched.idProfile &&
+                      Boolean(formik.errors.idProfile)
+                    }
                   >
-                    {profiles.map((profile) => (
-                      <MenuItem key={profile.id} value={profile.id}>
-                        {profile.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="password"
-                  name="password"
-                  label="Senha"
-                  type="password"
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  error={
-                    formik.touched.password && Boolean(formik.errors.password)
-                  }
-                  helperText={formik.touched.password && formik.errors.password}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  label="Confirmar Senha"
-                  type="password"
-                  value={formik.values.confirmPassword}
-                  onChange={formik.handleChange}
-                  error={
-                    formik.touched.confirmPassword &&
-                    Boolean(formik.errors.confirmPassword)
-                  }
-                  helperText={
-                    formik.touched.confirmPassword &&
-                    formik.errors.confirmPassword
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="status"
-                      name="status"
-                      checked={formik.values.status}
+                    <InputLabel id="profile-label">Perfil</InputLabel>
+                    <Select
+                      labelId="profile-label"
+                      id="idProfile"
+                      name="idProfile"
+                      value={formik.values.idProfile}
+                      label="Perfil"
                       onChange={formik.handleChange}
-                    />
-                  }
-                  label="Ativo"
-                />
+                    >
+                      {profiles.map((profile) => (
+                        <MenuItem key={profile.id} value={profile.id}>
+                          {profile.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    id="password"
+                    name="password"
+                    label="Senha"
+                    type="password"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.password && Boolean(formik.errors.password)
+                    }
+                    helperText={
+                      formik.touched.password && formik.errors.password
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    label="Confirmar Senha"
+                    type="password"
+                    value={formik.values.confirmPassword}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.confirmPassword &&
+                      Boolean(formik.errors.confirmPassword)
+                    }
+                    helperText={
+                      formik.touched.confirmPassword &&
+                      formik.errors.confirmPassword
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        id="status"
+                        name="status"
+                        checked={formik.values.status}
+                        onChange={formik.handleChange}
+                      />
+                    }
+                    label="Ativo"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    type="submit"
+                    sx={{ mt: 3 }}
+                  >
+                    Cadastrar
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  type="submit"
-                  sx={{ mt: 3 }}
-                >
-                  Cadastrar
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-        </Paper>
+            </form>
+          </Paper>
 
-        <Snackbar
-          open={openSnackbar}
-          autoHideDuration={5000}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          onClose={() => setOpenSnackbar(false)}
-        >
-          <Alert severity={snackbarSeverity} elevation={6} variant="filled">
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
+          <Snackbar
+            open={openSnackbar}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            onClose={() => setOpenSnackbar(false)}
+          >
+            <Alert severity={snackbarSeverity} elevation={6} variant="filled">
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
         </Container>
       </Box>
       <Footer />

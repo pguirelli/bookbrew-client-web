@@ -54,48 +54,43 @@ const validationSchema = yup.object({
   paymentMethod: yup.string().required("Selecione um método de pagamento"),
 });
 
-const PaymentCardForm = ({ type }: { type: 'credit' | 'debit' }) => (
+const PaymentCardForm = ({ type }: { type: "credit" | "debit" }) => (
   <Grid container spacing={2}>
     <Grid item xs={12}>
-      <TextField 
-        fullWidth 
-        label="Número do Cartão" 
+      <TextField
+        fullWidth
+        label="Número do Cartão"
         name={`${type}CardNumber`}
         required
       />
     </Grid>
     <Grid item xs={6}>
-      <TextField 
-        fullWidth 
-        label="Validade" 
+      <TextField
+        fullWidth
+        label="Validade"
         name={`${type}ExpiryDate`}
         required
       />
     </Grid>
     <Grid item xs={6}>
-      <TextField 
-        fullWidth 
-        label="CVV" 
-        name={`${type}Cvv`}
-        required
-      />
+      <TextField fullWidth label="CVV" name={`${type}Cvv`} required />
     </Grid>
     <Grid item xs={12}>
-      <TextField 
-        fullWidth 
-        label="Nome no Cartão" 
+      <TextField
+        fullWidth
+        label="Nome no Cartão"
         name={`${type}HolderName`}
         required
       />
     </Grid>
-    {type === 'credit' && (
+    {type === "credit" && (
       <Grid item xs={12}>
         <FormControl fullWidth>
           <InputLabel>Parcelas</InputLabel>
           <Select defaultValue={1} name="installments">
             {[...Array(12)].map((_, i) => (
               <MenuItem key={i + 1} value={i + 1}>
-                {i + 1}x {i === 0 ? 'sem juros' : 'com juros'}
+                {i + 1}x {i === 0 ? "sem juros" : "com juros"}
               </MenuItem>
             ))}
           </Select>
@@ -108,7 +103,7 @@ const PaymentCardForm = ({ type }: { type: 'credit' | 'debit' }) => (
 const PaymentPix = () => (
   <Box textAlign="center">
     <Typography variant="h6">QR Code PIX</Typography>
-    <Box sx={{ my: 2, p: 2, border: '1px solid #ccc' }}>
+    <Box sx={{ my: 2, p: 2, border: "1px solid #ccc" }}>
       [QR Code Placeholder]
     </Box>
     <TextField
@@ -134,7 +129,8 @@ const PaymentBoleto = () => (
 );
 
 export const RegisterOrder = () => {
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<string>("");
   const [addresses, setAddresses] = useState<Address[]>([
     {
       id: 1,
@@ -156,25 +152,23 @@ export const RegisterOrder = () => {
           productId: 1,
           productName: "Livro 1",
           quantity: 2,
-          unitPrice: 29.90,
-          subtotal: 59.80,
+          unitPrice: 29.9,
+          subtotal: 59.8,
         },
         {
           productId: 2,
           productName: "Livro 2",
           quantity: 1,
-          unitPrice: 45.90,
-          subtotal: 45.90,
+          unitPrice: 45.9,
+          subtotal: 45.9,
         },
       ] as OrderItem[],
-      addressId: '',
-      paymentMethod: '',
+      addressId: "",
+      paymentMethod: "",
       discount: 0,
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
-    },
+    onSubmit: (values) => {},
   });
 
   const calculateTotalItems = () => {
@@ -193,23 +187,23 @@ export const RegisterOrder = () => {
     const updatedItems = [...formik.values.items];
     updatedItems[index].quantity = newQuantity;
     updatedItems[index].subtotal = newQuantity * updatedItems[index].unitPrice;
-    formik.setFieldValue('items', updatedItems);
+    formik.setFieldValue("items", updatedItems);
   };
 
   const handleRemoveItem = (index: number) => {
     const updatedItems = formik.values.items.filter((_, i) => i !== index);
-    formik.setFieldValue('items', updatedItems);
+    formik.setFieldValue("items", updatedItems);
   };
 
   const renderPaymentMethod = () => {
     switch (selectedPaymentMethod) {
-      case 'credit':
+      case "credit":
         return <PaymentCardForm type="credit" />;
-      case 'debit':
+      case "debit":
         return <PaymentCardForm type="debit" />;
-      case 'pix':
+      case "pix":
         return <PaymentPix />;
-      case 'boleto':
+      case "boleto":
         return <PaymentBoleto />;
       default:
         return null;
@@ -225,7 +219,6 @@ export const RegisterOrder = () => {
 
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={3}>
-            {/* Items Section */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
@@ -240,7 +233,12 @@ export const RegisterOrder = () => {
                         <TextField
                           type="number"
                           value={item.quantity}
-                          onChange={(e) => handleQuantityChange(index, parseInt(e.target.value))}
+                          onChange={(e) =>
+                            handleQuantityChange(
+                              index,
+                              parseInt(e.target.value)
+                            )
+                          }
                           inputProps={{ min: 1 }}
                           sx={{ width: 80, mx: 2 }}
                         />
@@ -259,7 +257,6 @@ export const RegisterOrder = () => {
               </Card>
             </Grid>
 
-            {/* Address Section */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
@@ -278,18 +275,13 @@ export const RegisterOrder = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  <Button 
-                    variant="outlined" 
-                    sx={{ mt: 2 }}
-                    onClick={() => {/* Navigate to address form */}}
-                  >
+                  <Button variant="outlined" sx={{ mt: 2 }} onClick={() => {}}>
                     Novo Endereço
                   </Button>
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Payment Section */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
@@ -312,7 +304,6 @@ export const RegisterOrder = () => {
               </Card>
             </Grid>
 
-            {/* Order Summary */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
@@ -324,11 +315,15 @@ export const RegisterOrder = () => {
                     </ListItem>
                     <ListItem>
                       <ListItemText primary="Subtotal" />
-                      <Typography>R$ {calculateSubtotal().toFixed(2)}</Typography>
+                      <Typography>
+                        R$ {calculateSubtotal().toFixed(2)}
+                      </Typography>
                     </ListItem>
                     <ListItem>
                       <ListItemText primary="Desconto" />
-                      <Typography>R$ {formik.values.discount.toFixed(2)}</Typography>
+                      <Typography>
+                        R$ {formik.values.discount.toFixed(2)}
+                      </Typography>
                     </ListItem>
                     <Divider />
                     <ListItem>

@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { Product } from "../types/product.types";
 
-// Tipos para o carrinho
 interface CartItem extends Product {
   quantity: number;
 }
@@ -29,7 +28,6 @@ function discountedPrice(price: number, discountPercentage: number): number {
   return price * (1 - discountPercentage / 100);
 }
 
-// Ações do reducer
 type CartAction =
   | { type: "ADD_ITEM"; payload: Product }
   | { type: "REMOVE_ITEM"; payload: number }
@@ -44,7 +42,6 @@ const initialState: CartState = {
   total: 0,
 };
 
-// Criação do contexto
 const CartContext = createContext<CartContextType>({
   state: initialState,
   addItemToCart: () => {},
@@ -122,7 +119,6 @@ function cartReducer(
   }
 }
 
-// Função auxiliar para calcular o total
 function calculateTotal(items: CartItem[]): number {
   return items.reduce((total, item) => {
     const itemPrice = discountedPrice(item.price, item.discountPercentage || 0);
@@ -130,7 +126,6 @@ function calculateTotal(items: CartItem[]): number {
   }, 0);
 }
 
-// Provider do carrinho
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
@@ -148,7 +143,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "REMOVE_ITEM", payload: productId });
   };
 
-  const updateQuantity = (productId: number, quantity: number, action: number) => {
+  const updateQuantity = (
+    productId: number,
+    quantity: number,
+    action: number
+  ) => {
     dispatch({ type: "UPDATE_QUANTITY", payload: { productId, quantity } });
   };
 
@@ -171,14 +170,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook personalizado para usar o contexto do carrinho
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
     throw new Error("useCart must be used within a CartProvider");
   }
 
-  // Garanta que o estado tem a estrutura correta
   const safeState: CartState = {
     items: context.state?.items || [],
     total: context.state?.total || 0,

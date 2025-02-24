@@ -4,6 +4,9 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import { authService } from "../../services/auth.service.ts";
 import { useNavigate } from "react-router-dom";
+import { Footer } from "../../pages/Components/Footer.tsx";
+import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
+import { useAuthContext } from "../../contexts/AuthContext.tsx";
 
 const validationSchema = yup.object({
   email: yup.string().email("E-mail inválido").required("Informe o e-mail"),
@@ -15,6 +18,7 @@ const validationSchema = yup.object({
 
 export const ForgotPassword = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuthContext();
 
   const [token, setToken] = useState<string | null>(null);
   const formik = useFormik({
@@ -29,7 +33,6 @@ export const ForgotPassword = () => {
       try {
         const response = await authService.forgotPassword(values);
         setToken(response.token);
-        console.log("ForgotPassword response:", response);
       } catch (error) {
         console.error("Error:", error);
         formik.setStatus(
@@ -43,89 +46,117 @@ export const ForgotPassword = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        flexDirection: "column",
         minHeight: "100vh",
+        position: "relative",
       }}
     >
-      <Paper elevation={3} sx={{ p: 4, width: "100%", maxWidth: 400 }}>
-        <Typography
-          variant="h5"
-          component="h1"
-          sx={{ mb: 3, textAlign: "center" }}
-        >
-          Recuperar Senha
-        </Typography>
-
-        {formik.status && (
-          <pre
-            style={{
-              color: "#d32f2f",
-              fontSize: "0.75rem",
-              fontFamily: "Roboto, Helvetica, Arial, sans-serif",
-              textAlign: "center",
-              marginBottom: "10px",
-            }}
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
+      return (
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 3,
+          pb: "80px",
+          overflowY: "auto",
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 4, width: "100%", maxWidth: 400 }}>
+          <Typography
+            variant="h5"
+            component="h1"
+            sx={{ mb: 3, textAlign: "center" }}
           >
-            {formik.status}
-          </pre>
-        )}
+            Recuperar Senha
+          </Typography>
 
-        <form onSubmit={formik.handleSubmit}>
-          <TextField
-            fullWidth
-            id="email"
-            name="email"
-            label="E-mail"
-            margin="normal"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
-          />
-
-          <TextField
-            fullWidth
-            id="cpf"
-            name="cpf"
-            label="CPF"
-            margin="normal"
-            value={formik.values.cpf}
-            onChange={formik.handleChange}
-            error={formik.touched.cpf && Boolean(formik.errors.cpf)}
-            helperText={formik.touched.cpf && formik.errors.cpf}
-          />
-
-          <Button fullWidth variant="contained" type="submit" sx={{ mt: 3 }}>
-            Enviar
-          </Button>
-        </form>
-
-        {/* Display the token in a styled box if it exists */}
-        {token && (
-          <Box
-            sx={{
-              mt: 3,
-              p: 2,
-              backgroundColor: "#e0f7fa", // Light teal color
-              borderRadius: 1,
-              textAlign: "center",
-            }}
-          >
-            <Typography variant="h6">Token de Recuperação:</Typography>
-            <Typography variant="body1">{token}</Typography>
-
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => navigate("/reset-password")}
-              sx={{ mt: 3 }}
+          {formik.status && (
+            <pre
+              style={{
+                color: "#d32f2f",
+                fontSize: "0.75rem",
+                fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+                textAlign: "center",
+                marginBottom: "10px",
+              }}
             >
-              Alterar Senha
+              {formik.status}
+            </pre>
+          )}
+
+          <form onSubmit={formik.handleSubmit}>
+            <TextField
+              fullWidth
+              id="email"
+              name="email"
+              label="E-mail"
+              margin="normal"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
+            />
+
+            <TextField
+              fullWidth
+              id="cpf"
+              name="cpf"
+              label="CPF"
+              margin="normal"
+              value={formik.values.cpf}
+              onChange={formik.handleChange}
+              error={formik.touched.cpf && Boolean(formik.errors.cpf)}
+              helperText={formik.touched.cpf && formik.errors.cpf}
+            />
+
+            <Button fullWidth variant="contained" type="submit" sx={{ mt: 3 }}>
+              Enviar
             </Button>
-          </Box>
-        )}
-      </Paper>
+          </form>
+
+          {token && (
+            <Box
+              sx={{
+                mt: 3,
+                p: 2,
+                backgroundColor: "#e0f7fa",
+                borderRadius: 1,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="h6">Token de Recuperação:</Typography>
+              <Typography variant="body1">{token}</Typography>
+
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => navigate("/reset-password")}
+                sx={{ mt: 3 }}
+              >
+                Alterar Senha
+              </Button>
+            </Box>
+          )}
+        </Paper>
+      </Box>
+      <Footer />
     </Box>
   );
 };

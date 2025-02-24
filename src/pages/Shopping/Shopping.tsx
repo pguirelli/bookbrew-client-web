@@ -49,7 +49,7 @@ import { CategoryProd } from "../../types/product.types";
 import { MenuItemsManagement } from "../../pages/Components/MenuItemsManagement.tsx";
 import { Footer } from "../../pages/Components/Footer.tsx";
 import { base64ToBlob } from "../../pages/Components/FunctionToConvertBase64Blob.tsx";
-import { useCart } from '../../contexts/CartProvider.tsx';
+import { useCart } from "../../contexts/CartProvider.tsx";
 
 function discountedPrice(price: number, discount: number): number {
   if (discount > 0) {
@@ -91,7 +91,7 @@ export const Shopping = () => {
         if (showBestSellers) {
           filteredProducts = fetchedProducts
             .sort((a, b) => (b.salesQuantity || 0) - (a.salesQuantity || 0))
-            .slice(0, 30); // Pega apenas os 30 mais vendidos
+            .slice(0, 30);
         } else {
           filteredProducts = fetchedProducts.filter((product) => {
             const matchesBrand = selectedBrand
@@ -124,7 +124,6 @@ export const Shopping = () => {
     fetchBrands();
   }, []);
 
-  
   useEffect(() => {
     const fetchCategories = async () => {
       const fetchedCategories = await productService.getAllCategories();
@@ -138,23 +137,23 @@ export const Shopping = () => {
     const fetchProducts = async () => {
       try {
         const fetchedProducts = await productService.getAllProducts();
-        setProductsList(fetchedProducts); // Atualiza o estado com os produtos da API
+        setProductsList(fetchedProducts);
       } catch (error) {
-        setError("Failed to fetch products"); // Se ocorrer erro, armazena a mensagem de erro
+        setError("Failed to fetch products");
       } finally {
-        setLoading(false); // Desativa o carregamento
+        setLoading(false);
       }
     };
 
-    fetchProducts(); // Chama a função para buscar os produtos
+    fetchProducts();
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Mostra a mensagem de carregamento
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>; // Exibe a mensagem de erro
+    return <div>{error}</div>;
   }
 
   const handleAddToCart = (product: Product) => {
@@ -172,10 +171,6 @@ export const Shopping = () => {
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
-  };
-
-  const addToCart = (product: Product) => {
-    setCartItems([...cartItems, product]);
   };
 
   const navigateToCheckout = () => {
@@ -254,9 +249,9 @@ export const Shopping = () => {
             setShowBestSellers(false);
             setSelectedBrand(null);
             setSelectedCategory(null);
-            setPage(1); // Redefine a paginação
-            setSortBy(""); // Redefine a ordenação
-            setDrawerOpen(false); // Fecha o menu
+            setPage(1);
+            setSortBy("");
+            setDrawerOpen(false);
           }}
         >
           <ListItemIcon>
@@ -285,8 +280,8 @@ export const Shopping = () => {
                     }
                     setSelectedCategory(null);
                     setShowBestSellers(false);
-                    setPage(1); // Redefine a paginação
-                    setSortBy(""); // Redefine a ordenação
+                    setPage(1);
+                    setSortBy("");
                     setDrawerOpen(false);
                   }}
                 >
@@ -317,8 +312,8 @@ export const Shopping = () => {
                     }
                     setSelectedBrand(null);
                     setShowBestSellers(false);
-                    setPage(1); // Redefine a paginação
-                    setSortBy(""); // Redefine a ordenação
+                    setPage(1);
+                    setSortBy("");
                     setDrawerOpen(false);
                   }}
                 >
@@ -334,9 +329,9 @@ export const Shopping = () => {
             setShowBestSellers(true);
             setSelectedBrand(null);
             setSelectedCategory(null);
-            setPage(1); // Redefine a paginação
-            setSortBy(""); // Redefine a ordenação
-            setDrawerOpen(false); // Fecha o menu
+            setPage(1);
+            setSortBy("");
+            setDrawerOpen(false);
           }}
         >
           <ListItemIcon>
@@ -370,7 +365,22 @@ export const Shopping = () => {
   );
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "1rem",
+          bgcolor: "background.default",
+        }}
+      ></Box>
       <AppBar position="fixed">
         <Toolbar>
           <IconButton color="inherit" edge="start" onClick={handleDrawerToggle}>
@@ -531,11 +541,9 @@ export const Shopping = () => {
                                 product.price,
                                 product.discountPercentage ?? 0
                               ).toFixed(2)}{" "}
-                              {/* Preço com desconto */}
                             </Typography>
                             <Box display="flex" alignItems="center" gap={2}>
                               {" "}
-                              {/* Exibe horizontalmente */}
                               <Typography
                                 align="center"
                                 variant="h6"
@@ -551,7 +559,6 @@ export const Shopping = () => {
                                 gutterBottom
                               >
                                 R$ {product.price.toFixed(2)}{" "}
-                                {/* Preço original riscado */}
                               </Typography>
                             </Box>
                           </>
@@ -563,7 +570,6 @@ export const Shopping = () => {
                             gutterBottom
                           >
                             R$ {product.price.toFixed(2)}{" "}
-                            {/* Preço sem desconto */}
                           </Typography>
                         )}
                       </div>

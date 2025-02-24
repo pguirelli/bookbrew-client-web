@@ -36,7 +36,6 @@ import { Product } from "../../types/product.types.ts";
 import { CategoryProd } from "../../types/product.types.ts";
 import { Brand } from "../../types/product.types.ts";
 import { ProductImage } from "../../types/product.types.ts";
-import { ProductImageDTO } from "../../types/product.types.ts";
 import ImageCarousel from "../../pages/Shopping/ImageCarousel.tsx";
 import { useAuthContext } from "../../contexts/AuthContext.tsx";
 import { ConfirmationDialog } from "../Components/ConfirmationDialog.tsx";
@@ -47,7 +46,6 @@ import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCusto
 import { Footer } from "../../pages/Components/Footer.tsx";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
-// Esquema de validação centralizado com yup
 const validationSchema = yup.object({
   code: yup.string().required("Informe o código do produto"),
   title: yup.string().required("Informe o título do produto"),
@@ -70,11 +68,9 @@ const validationSchema = yup.object({
     .required("Selecione uma marca"),
 });
 
-// Tipo para ordenação
 type Order = "asc" | "desc";
 
 export const ManageProduct = () => {
-  // Estados gerais
   const [searchTerm, setSearchTerm] = useState("");
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Product>("title");
@@ -96,12 +92,10 @@ export const ManageProduct = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
 
-  // Carrega os produtos ao montar o componente
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Carrega as categorias
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -114,7 +108,6 @@ export const ManageProduct = () => {
     fetchCategories();
   }, []);
 
-  // Carrega as marcas
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -127,7 +120,6 @@ export const ManageProduct = () => {
     fetchBrands();
   }, []);
 
-  // Configurações do Formik – utilizando o esquema de validação com yup
   const formik = useFormik({
     initialValues: {
       code: "",
@@ -148,7 +140,6 @@ export const ManageProduct = () => {
     validationSchema: validationSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
-        // Monta o objeto produto SEM o campo productImages
         const prod: Product = {
           code: values.code,
           title: values.title,
@@ -171,36 +162,29 @@ export const ManageProduct = () => {
             description: "",
             status: false,
           },
-          // NOTE: productImages não é enviado aqui!
         };
 
         let productId: number;
 
         if (editingId) {
-          // Atualiza o produto sem imagens
           await productService.updateProduct(editingId, prod);
           productId = editingId;
           await handleUpdateProductImages(productId);
         } else {
-          // Cria o produto sem enviar as imagens
           const createdProduct = await productService.createProduct(prod);
           productId = createdProduct.id ?? 1;
         }
 
-        // Após criar ou atualizar o produto, insere as imagens separadamente,
-        // transformando cada item em um objeto do tipo ProductImagesSearchDTO.
         if (values.productImages && values.productImages.length > 0) {
           for (const image of values.productImages) {
             if (image instanceof File) {
               const formData = new FormData();
-              // Utilize a chave "image" conforme o cURL bem-sucedido
+
               formData.append("image", image, image.name);
-              // Se houver uma descrição associada, use-a;
-              // se não, você pode deixar uma string vazia ou atribuir um valor default.
               formData.append("description", image.name || "Img");
-              // Utilize a chave "product.id" para enviar o id do produto
+
               formData.append("product.id", productId.toString());
-              // Chamada do serviço para upload de imagem (não passando o productId como parâmetro, pois ele vem no form-data)
+
               await productService.createProductImage(formData);
             }
           }
@@ -216,14 +200,12 @@ export const ManageProduct = () => {
     },
   });
 
-  // Função para exibir a snackbar
   const showSnackbar = (message: string, severity: "success" | "error") => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setOpenSnackbar(true);
   };
 
-  // Carregar a lista de produtos
   const fetchProducts = async () => {
     try {
       const fetchedProducts: Product[] = await productService.getAllProducts();
@@ -233,34 +215,28 @@ export const ManageProduct = () => {
     }
   };
 
-  // Abertura do diálogo de confirmação para exclusão
   const openConfirmDialog = (productId: number) => {
     setSelectedProductId(productId);
     setConfirmDialogOpen(true);
   };
 
-  // Fechar o diálogo de confirmação
   const closeConfirmDialog = () => {
     setSelectedProductId(null);
     setConfirmDialogOpen(false);
   };
 
-  // Manuseia a exclusão de produtos
   const handleDelete = async () => {
     if (selectedProductId !== null) {
       try {
-        // Para exclusão, primeiro buscamos os detalhes do produto para obter os IDs das imagens.
         const productDetail = await productService.getProduct(
           selectedProductId
         );
 
-        // Caso haja imagens associadas, iteramos para chamar deleteProductImage para cada uma.
         if (
           productDetail.productImages &&
           productDetail.productImages.length > 0
         ) {
           for (const img of productDetail.productImages) {
-            // Verifica se o id da imagem está definido
             if (img.id) {
               await productService.deleteProductImage(
                 selectedProductId,
@@ -269,7 +245,7 @@ export const ManageProduct = () => {
             }
           }
         }
-        // Em seguida, excluir o produto.
+
         await productService.deleteProduct(selectedProductId);
         fetchProducts();
         closeConfirmDialog();
@@ -282,7 +258,6 @@ export const ManageProduct = () => {
     }
   };
 
-  // Filtra e ordena os produtos conforme os critérios selecionados
   const filteredAndSortedProducts = React.useMemo(() => {
     return [...products]
       .filter((product) => {
@@ -307,7 +282,6 @@ export const ManageProduct = () => {
       });
   }, [products, order, orderBy, searchTerm]);
 
-  // Carrega os dados para edição
   const handleEdit = async (product: Product) => {
     setEditingId(product.id ?? null);
     try {
@@ -334,7 +308,6 @@ export const ManageProduct = () => {
     }
   };
 
-  // Paginação da tabela de produtos
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
@@ -343,17 +316,14 @@ export const ManageProduct = () => {
   };
 
   const handleUpdateProductImages = async (productId: number) => {
-    // a. Executa a exclusão das imagens marcadas
     for (const imageId of deletedImageIds) {
       try {
         await productService.deleteProductImage(productId, imageId);
       } catch (error) {
         console.error("Erro ao excluir imagem com id:", imageId, error);
-        // Opcionalmente, tratar erro (exibir snackbar, etc)
       }
     }
 
-    // b. Executa a inclusão das novas imagens (apenas objetos File)
     if (formik.values.productImages && formik.values.productImages.length > 0) {
       for (const image of formik.values.productImages) {
         if (image instanceof File) {
@@ -365,20 +335,19 @@ export const ManageProduct = () => {
             await productService.createProductImage(formData);
           } catch (error) {
             console.error("Erro ao criar imagem:", error);
-            // Opcionalmente, tratar erro (exibir snackbar, etc)
           }
         }
       }
     }
-    // Limpe o estado dos IDs marcados após a operação
+
     setDeletedImageIds([]);
   };
 
-    const handleRequestSort = (property: keyof Product) => {
-      const isAsc = orderBy === property && order === "asc";
-      setOrder(isAsc ? "desc" : "asc");
-      setOrderBy(property);
-    };
+  const handleRequestSort = (property: keyof Product) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -388,14 +357,40 @@ export const ManageProduct = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
-        <Box sx={{ mt: 4 }} />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
+      return (
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
+        }}
+      >
+        <Box sx={{ mt: 1 }} />
 
         <Paper
           elevation={3}
@@ -616,13 +611,14 @@ export const ManageProduct = () => {
               <Paper
                 elevation={3}
                 sx={{
-                  p: 4,
+                  p: 2,
                   width: "100%",
                   maxWidth: 800,
-                  margin: "0 auto",
-                  minHeight: 500, 
+                  margin: "auto",
+                  minHeight: 500,
                   overflow: "hidden",
                   mt: 4,
+                  ml: 2,
                 }}
               >
                 <Typography
@@ -647,11 +643,9 @@ export const ManageProduct = () => {
                               return URL.createObjectURL(blob);
                             }
                             if (image instanceof File) {
-                              // Se a imagem for um objeto File, cria uma URL diretamente
                               return URL.createObjectURL(image);
                             }
                             if (image.imageData) {
-                              // Quando editamos o produto, o backend pode retornar a URL da imagem na propriedade 'path'
                               return image.imageData;
                             } else if (typeof image === "string") {
                               return image;
@@ -671,7 +665,6 @@ export const ManageProduct = () => {
                       onChange={(event) => {
                         const files = event.target.files;
                         if (files) {
-                          // Armazena os objetos File diretamente
                           const newImages = Array.from(files);
                           formik.setFieldValue("productImages", [
                             ...(formik.values.productImages ?? []),
@@ -708,9 +701,14 @@ export const ManageProduct = () => {
                               <IconButton
                                 edge="end"
                                 onClick={() => {
-                                  // Se a imagem for persistida, grava seu id
-                                  if (!(productImages instanceof File) && productImages.id) {
-                                    setDeletedImageIds((prev) => [...prev, productImages.id?? 0]);
+                                  if (
+                                    !(productImages instanceof File) &&
+                                    productImages.id
+                                  ) {
+                                    setDeletedImageIds((prev) => [
+                                      ...prev,
+                                      productImages.id ?? 0,
+                                    ]);
                                   }
                                   const newImages = (
                                     formik.values.productImages ?? []
@@ -776,7 +774,7 @@ export const ManageProduct = () => {
                     >
                       Título
                     </TableSortLabel>
-                    </TableCell>
+                  </TableCell>
                   <TableCell>Categoria</TableCell>
                   <TableCell>Marca</TableCell>
                   <TableCell>Preço</TableCell>

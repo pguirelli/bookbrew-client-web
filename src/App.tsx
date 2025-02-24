@@ -29,50 +29,173 @@ import { Contact } from "./pages/Information/Contact.tsx";
 import { Questions } from "./pages/Information/Questions.tsx";
 import { ProductView } from "./pages/Shopping/ProductView.tsx";
 import { Cart } from "./pages/Shopping/Cart.tsx";
-import { CartProvider } from './contexts/CartProvider.tsx';
-
+import { CartProvider } from "./contexts/CartProvider.tsx";
+import { PrivateRoute } from "./contexts/PrivateRoute.tsx";
 
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/forgot-email" element={<ForgotEmail />} />
-          <Route path="/change-password" element={<ChangePassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/register-customer" element={<RegisterCustomer />} />
-          <Route path="/register-user" element={<RegisterUser />} />
-          <Route path="/user-profile" element={<ManageUserProfile />} />
-          <Route path="/customer-profile" element={<CustomerProfile />} />
-          <Route path="/manage-customer" element={<ManageCustomer />} />
-          <Route path="/manage-user" element={<ManageUser />} />
-          <Route path="/manage-brand" element={<ManageBrand />} />
-          <Route path="/manage-category" element={<ManageCategory />} />
-          <Route path="/manage-product" element={<ManageProduct />} />
-          <Route path="/manage-promotion" element={<ManagePromotion />} />
-          <Route
-            path="/customer-review/:productId"
-            element={<CustomerReview />}
-          />
-          <Route path="/moderate-reviews" element={<ModerateReviews />} />
-          <Route path="/register-order" element={<RegisterOrder />} />
-          <Route path="/process-order" element={<ProcessOrder />} />
-          <Route path="/manage-order" element={<ManageOrder />} />
-          <Route path="/customer-orders" element={<CustomerOrders />} />
-          <Route path="/" element={<Shopping />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/product/:id" element={<ProductView />} />
-
-          <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/questions" element={<Questions />} />
-        </Routes>
-        
-      </BrowserRouter>
+        <BrowserRouter>
+          <Routes>
+            {/* Rotas públicas */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/forgot-email" element={<ForgotEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/success" element={<Success />} />
+            <Route path="/register-customer" element={<RegisterCustomer />} />
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/questions" element={<Questions />} />
+            <Route path="/" element={<Shopping />} />
+            {/* Rotas protegidas */}
+            <Route
+              path="/register-user"
+              element={
+                <PrivateRoute>
+                  <RegisterUser />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/change-password"
+              element={
+                <PrivateRoute>
+                  <ChangePassword />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/user-profile"
+              element={
+                <PrivateRoute>
+                  <ManageUserProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customer-profile"
+              element={
+                <PrivateRoute>
+                  <CustomerProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage-customer"
+              element={
+                <PrivateRoute>
+                  <ManageCustomer />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage-user"
+              element={
+                <PrivateRoute>
+                  <ManageUser />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage-brand"
+              element={
+                <PrivateRoute>
+                  <ManageBrand />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage-category"
+              element={
+                <PrivateRoute>
+                  <ManageCategory />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage-product"
+              element={
+                <PrivateRoute>
+                  <ManageProduct />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage-promotion"
+              element={
+                <PrivateRoute>
+                  <ManagePromotion />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customer-review/:productId"
+              element={
+                <PrivateRoute>
+                  <CustomerReview />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/moderate-reviews"
+              element={
+                <PrivateRoute>
+                  <ModerateReviews />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/register-order"
+              element={
+                <PrivateRoute>
+                  <RegisterOrder />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/process-order"
+              element={
+                <PrivateRoute>
+                  <ProcessOrder />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manage-order"
+              element={
+                <PrivateRoute>
+                  <ManageOrder />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customer-orders"
+              element={
+                <PrivateRoute>
+                  <CustomerOrders />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/cart"
+              element={
+                <PrivateRoute>
+                  <Cart />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/product/:id"
+              element={
+                <PrivateRoute>
+                  <ProductView />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
       </CartProvider>
     </AuthProvider>
   );

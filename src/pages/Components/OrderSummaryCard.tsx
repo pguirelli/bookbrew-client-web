@@ -23,7 +23,7 @@ export const OrderSummaryCard: React.FC<OrderSummaryProps> = ({
   onCheckout,
   onOrderComplete,
   checkoutControl,
-  onCheckoutControl 
+  onCheckoutControl,
 }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
@@ -35,8 +35,6 @@ export const OrderSummaryCard: React.FC<OrderSummaryProps> = ({
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
   const [addressError, setAddressError] = useState<string | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
-  const [selectedPayment, setSelectedPayment] = useState<string>("");
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -88,14 +86,8 @@ export const OrderSummaryCard: React.FC<OrderSummaryProps> = ({
   };
 
   const handleCheckout = () => {
-    
-    onCheckout(); 
+    onCheckout();
 
-    //console.log("teste:", teste);
-
-    const savedCart = localStorage.getItem("cart");
-
-    console.log("cartItems:", savedCart);
     const cartToSave = cartItems.map((item) => ({
       id: item.id,
       salesQuantity: item.quantity,
@@ -103,11 +95,9 @@ export const OrderSummaryCard: React.FC<OrderSummaryProps> = ({
       discountPercentage: item.discountPercentage,
       totalPrice:
         item.price * item.quantity * (1 - (item.discountPercentage ?? 0) / 100),
-      // adicione outros campos necessários
     }));
 
     localStorage.setItem("orderItems", JSON.stringify(cartToSave));
-    console.log("orderItems:", cartItems);
     setIsCheckoutOpen(true);
   };
 

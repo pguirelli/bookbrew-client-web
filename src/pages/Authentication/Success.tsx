@@ -3,7 +3,7 @@ import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const Success = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate();console.log
 
   const handleLogout = () => {
     localStorage.removeItem("user");

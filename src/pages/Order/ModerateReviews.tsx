@@ -20,7 +20,7 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
@@ -69,7 +69,6 @@ export const ModerateReviews = () => {
     setOrderBy(property);
   };
 
-  // Função para ordenar os dados
   const sortReviews = (reviews: ProductReviewDTO[]) => {
     if (!orderBy) return reviews;
 
@@ -197,7 +196,6 @@ export const ModerateReviews = () => {
     const searchLower = searchTerm.toLowerCase().trim();
 
     return reviews.filter((review) => {
-      // Se os dados já estão na review, use-os diretamente
       const userName = users.get(review.userId)?.name?.toLowerCase() || "";
       const productTitle =
         products.get(review.productId)?.title?.toLowerCase() || "";
@@ -229,26 +227,51 @@ export const ModerateReviews = () => {
   });
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
-        <Box sx={{ mt: 3 }} />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
+      return (
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
+        }}
+      >
+        <Box sx={{ mt: 1 }} />
         {(editingId || formik.values.comment) && (
           <Paper
             elevation={3}
             sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
           >
-            <Typography variant="h6" component="h2" sx={{ mb: 3 }}>
+            <Typography variant="h5" component="h1" sx={{ mb: 3 }}>
               {editingId ? "Moderar Avaliação" : "Visualizar Avaliação"}
             </Typography>
 
             <form onSubmit={formik.handleSubmit}>
               <Grid container spacing={2}>
-                {/* Informações da Avaliação (Somente Leitura) */}
                 <Grid item xs={12}>
                   <Typography variant="subtitle2" color="textSecondary">
                     Avaliação feita por:{" "}
@@ -272,11 +295,10 @@ export const ModerateReviews = () => {
                     }}
                     precision={1}
                     size="large"
-                    readOnly={!editingId} // somente leitura quando não estiver em edição
+                    readOnly={!editingId}
                   />
                 </Grid>
 
-                {/* Campo de Comentário */}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -297,7 +319,6 @@ export const ModerateReviews = () => {
                   />
                 </Grid>
 
-                {/* Campo de Status */}
                 <Grid item xs={12}>
                   <FormControlLabel
                     control={
@@ -312,7 +333,6 @@ export const ModerateReviews = () => {
                   />
                 </Grid>
 
-                {/* Botões de Ação */}
                 <Grid
                   item
                   xs={12}
@@ -342,7 +362,11 @@ export const ModerateReviews = () => {
           elevation={3}
           sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}
         >
-          <Typography variant="h6" component="h2" sx={{ mb: 3 }}>
+          <Typography
+            variant="h5"
+            component="h1"
+            sx={{ mb: 3, textAlign: "center" }}
+          >
             Moderação de Avaliações
           </Typography>
 
@@ -425,7 +449,7 @@ export const ModerateReviews = () => {
             <TablePagination
               rowsPerPageOptions={[10, 20]}
               component="div"
-              count={filterReviews(reviews, searchTerm).length} // Use a contagem filtrada
+              count={filterReviews(reviews, searchTerm).length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

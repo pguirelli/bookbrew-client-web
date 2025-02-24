@@ -26,7 +26,7 @@ export const MenuItemsManagement: React.FC<MenuItemsManagementProps> = ({
     const customer = await customerService.getCustomerByUserId(user?.id ?? 0);
     return customer;
   };
-      
+
   useEffect(() => {
     const loadCustomer = async () => {
       const customer = await getCustomer();
@@ -36,7 +36,6 @@ export const MenuItemsManagement: React.FC<MenuItemsManagementProps> = ({
         loadCustomer();
       }
     };
-   
   }, []);
 
   return isAuthenticated ? (

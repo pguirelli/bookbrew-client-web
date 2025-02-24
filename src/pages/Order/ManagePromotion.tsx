@@ -17,11 +17,7 @@ import {
   Checkbox,
   FormControlLabel,
   TableSortLabel,
-  Select,
-  MenuItem,
-  InputLabel,
   FormControl,
-  Container,
   Snackbar,
   Alert,
   Autocomplete,
@@ -227,14 +223,12 @@ export const ManagePromotion = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        // Convert Date objects to ISO strings to match PromotionDTO type.
         const promotionToSave: PromotionDTO = {
           ...values,
           startDate: values.startDate.toISOString(),
           endDate: values.endDate.toISOString(),
         };
         await handleCreateOrUpdatePromotion(promotionToSave);
-
       } catch (error) {
         console.error("Operation error:", error);
       }
@@ -254,14 +248,39 @@ export const ManagePromotion = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
       return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
+        }}
+      >
         <Box sx={{ mt: 1 }} />
 
         <Paper

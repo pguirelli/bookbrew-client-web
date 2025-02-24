@@ -4,7 +4,7 @@ import {
   ForgotPasswordData,
   ForgotEmailData,
   ResetPasswordData,
-  ChangePasswordData
+  ChangePasswordData,
 } from "../types/auth.types.ts";
 
 const API_URL = "http://localhost:8081/bff";
@@ -31,7 +31,10 @@ export const authService = {
   },
 
   changePassword: async (userId: number, data: ChangePasswordData) => {
-    const response = await axios.put(`${API_URL}/auth/users/${userId}/password`, data);
+    const response = await axios.put(
+      `${API_URL}/auth/users/${userId}/password`,
+      data
+    );
     return response.data;
-  }
+  },
 };

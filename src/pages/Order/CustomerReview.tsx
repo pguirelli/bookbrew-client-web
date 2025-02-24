@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Card,
-  CardContent,
   Checkbox,
   Container,
   FormControlLabel,
@@ -94,7 +93,6 @@ export const CustomerReview = () => {
     setOrderBy(property);
   };
 
-  // Função para ordenar os dados
   const sortReviews = (reviews: ProductReviewDTO[]) => {
     if (!orderBy) return reviews;
 
@@ -165,39 +163,30 @@ export const CustomerReview = () => {
 
   const fetchAvailableProducts = async () => {
     try {
-      // Buscar todos os produtos do usuário
-      console.log("user.id", user?.id);
-
       let customer = await customerService.getCustomerByUserId(user?.id ?? 0);
       const userOrders = await orderService.getOrdersByCustomer(
         customer?.id ?? 0
       );
 
-      // Extrair IDs únicos dos produtos dos pedidos
       const orderedProductIds = new Set(
         userOrders.flatMap(
           (order) => order.orderItems?.map((item) => item.productId) ?? []
         )
       );
 
-      // Buscar detalhes de todos os produtos ordenados
       const productPromises = Array.from(orderedProductIds).map((id) =>
         productService.getProductById(id)
       );
 
       const products = await Promise.all(productPromises);
 
-      // Filtrar produtos que já foram avaliados
       const reviewedProductIds = new Set(
         reviews.map((review) => review.productId)
       );
 
-      // Definir apenas produtos que ainda não foram avaliados
       const availableToReview = products.filter(
         (product) => !reviewedProductIds.has(product.id ?? 0)
       );
-
-      console.log("Produtos disponíveis para avaliação:", availableToReview);
 
       setAvailableProducts(availableToReview);
     } catch (error) {
@@ -269,7 +258,6 @@ export const CustomerReview = () => {
     const searchLower = searchTerm.toLowerCase().trim();
 
     return reviews.filter((review) => {
-      // Se os dados já estão na review, use-os diretamente
       const userName = users.get(review.userId)?.name?.toLowerCase() || "";
       const productTitle =
         products.get(review.productId)?.title?.toLowerCase() || "";
@@ -301,24 +289,48 @@ export const CustomerReview = () => {
   });
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
       return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
+        }}
+      >
         <Box sx={{ mt: 1 }} />
         <Container maxWidth="lg">
           <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h5" gutterBottom>
+            <Typography variant="h5" align="center" gutterBottom>
               Minhas Avaliações
             </Typography>
 
-            {/* Formulário de Avaliação */}
             {showReviewForm && selectedProduct && (
-              <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+              <Paper elevation={3} sx={{ p: 3, mb: 3, mt: 2 }}>
                 <Typography variant="h6" gutterBottom>
                   {editingId ? "Editar Avaliação" : "Nova Avaliação"}
                 </Typography>
@@ -400,12 +412,11 @@ export const CustomerReview = () => {
               </Paper>
             )}
 
-            {/* Lista de Produtos para Avaliar */}
-            <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
+            <Paper elevation={3} sx={{ p: 3, mb: 3, mt: 4 }}>
+              <Typography variant="h6" gutterBottom align="center">
                 Produtos Disponíveis para Avaliação
               </Typography>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
                 {availableProducts
                   .filter(
                     (product) =>
@@ -425,32 +436,35 @@ export const CustomerReview = () => {
                         <Card
                           sx={{
                             width: "100%",
-                            maxWidth: 350,
-                            height: 200,
+                            maxWidth: 300,
+                            height: 150,
                             overflow: "hidden",
                           }}
                         >
-                          <ImageCarousel
-                            images={(product?.productImages ?? [])
-                              .map((image) => {
-                                const blob = base64ToBlob(
-                                  image.imageData,
+                          {product.productImages?.[0] ? (
+                            <img
+                              src={URL.createObjectURL(
+                                base64ToBlob(
+                                  product.productImages[0].imageData,
                                   "image/jpeg"
-                                );
-                                if (!blob) {
-                                  console.error(
-                                    "Falha ao converter dados da imagem para Blob:",
-                                    image
-                                  );
-                                  return null;
-                                }
-                                return URL.createObjectURL(blob);
-                              })
-                              .filter((url): url is string => url !== null)}
-                          />
+                                )!
+                              )}
+                              style={{
+                                width: "100%",
+                              }}
+                            />
+                          ) : (
+                            <img
+                              src="/landscape-placeholder.png"
+                              alt="Placeholder"
+                              style={{
+                                width: "100%",
+                              }}
+                            />
+                          )}
                         </Card>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle1">
+                          <Typography variant="subtitle1" align="center">
                             {product.title}
                           </Typography>
                           <Button
@@ -479,11 +493,11 @@ export const CustomerReview = () => {
 
                 <form onSubmit={formik.handleSubmit}>
                   <Grid container spacing={2}>
-                    {/* Informações da Avaliação (Somente Leitura) */}
                     <Grid item xs={12}>
                       <Typography variant="subtitle2" color="textSecondary">
                         Avaliação feita por:{" "}
-                        {users.get(formik.values.userId)?.name} {users.get(formik.values.userId)?.lastName}
+                        {users.get(formik.values.userId)?.name}{" "}
+                        {users.get(formik.values.userId)?.lastName}
                       </Typography>
                       <Typography
                         variant="subtitle2"
@@ -502,11 +516,10 @@ export const CustomerReview = () => {
                         }}
                         precision={1}
                         size="large"
-                        readOnly={!editingId} // somente leitura quando não estiver em edição
+                        readOnly={!editingId}
                       />
                     </Grid>
 
-                    {/* Campo de Comentário */}
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
@@ -530,7 +543,6 @@ export const CustomerReview = () => {
                       />
                     </Grid>
 
-                    {/* Campo de Status */}
                     <Grid item xs={12}>
                       <FormControlLabel
                         control={
@@ -545,7 +557,6 @@ export const CustomerReview = () => {
                       />
                     </Grid>
 
-                    {/* Botões de Ação */}
                     <Grid
                       item
                       xs={12}
@@ -580,7 +591,12 @@ export const CustomerReview = () => {
             )}
 
             <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" component="h2" sx={{ mb: 3 }}>
+              <Typography
+                variant="h6"
+                component="h2"
+                sx={{ mb: 3 }}
+                align="center"
+              >
                 Moderação de Avaliações
               </Typography>
 
@@ -670,7 +686,7 @@ export const CustomerReview = () => {
                 <TablePagination
                   rowsPerPageOptions={[10, 20]}
                   component="div"
-                  count={filterReviews(reviews, searchTerm).length} // Use a contagem filtrada
+                  count={filterReviews(reviews, searchTerm).length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onPageChange={handleChangePage}

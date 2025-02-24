@@ -100,11 +100,7 @@ export const ManageCustomer = () => {
   const handleUpdateCustomer = async (values: Customer) => {
     try {
       if (!editingId) return;
-      // Log dos valores antes de enviar
-      console.log("Dados enviados para atualização:", {
-        ...values,
-        phone: values.phone, // verificar formato do telefone
-      });
+
       await customerService.updateCustomer(editingId, values);
       await fetchCustomers();
       formik.resetForm();
@@ -259,14 +255,40 @@ export const ManageCustomer = () => {
   });
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <MenuItemsSummCustomer
-        user={user}
-        isAuthenticated={isAuthenticated}
-        logout={logout}
-      />
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: 3 }}>
-        <Box sx={{ mt: 4 }} />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          marginBottom: "2rem",
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
+      return (
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pb: "80px",
+          gap: 3,
+        }}
+      >
+        <Box sx={{ mt: 1 }} />
         <Paper
           elevation={3}
           sx={{ p: 4, width: "100%", maxWidth: 800, margin: "0 auto" }}

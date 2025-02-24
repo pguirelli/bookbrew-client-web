@@ -4,6 +4,9 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import { authService } from "../../services/auth.service.ts";
 import { useNavigate } from "react-router-dom";
+import { Footer } from "../../pages/Components/Footer.tsx";
+import { MenuItemsSummCustomer } from "../../pages/Components/MenuItemsSummCustomer.tsx";
+import { useAuthContext } from "../../contexts/AuthContext.tsx";
 
 const validationSchema = yup.object({
   cpf: yup
@@ -20,6 +23,7 @@ const validationSchema = yup.object({
 
 export const ForgotEmail = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuthContext();
 
   const [recoveredEmail, setRecoveredEmail] = useState<string | null>(null);
 
@@ -59,89 +63,117 @@ export const ForgotEmail = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        flexDirection: "column",
         minHeight: "100vh",
-        p: 3,
+        position: "relative",
       }}
     >
-      <Paper elevation={3} sx={{ p: 4, width: "100%", maxWidth: 400 }}>
-        <Typography
-          variant="h5"
-          component="h1"
-          sx={{ mb: 3, textAlign: "center" }}
-        >
-          Recuperar E-mail
-        </Typography>
-
-        {formik.status && (
-          <pre
-            style={{
-              color: "#d32f2f",
-              fontSize: "0.75rem",
-              fontFamily: "Roboto, Helvetica, Arial, sans-serif",
-              textAlign: "center",
-              marginBottom: "10px",
-            }}
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          bgcolor: "background.default",
+        }}
+      >
+        <MenuItemsSummCustomer
+          user={user}
+          isAuthenticated={isAuthenticated}
+          logout={logout}
+        />
+      </Box>
+      return (
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 3,
+          pb: "80px",
+          overflowY: "auto",
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 4, width: "100%", maxWidth: 400 }}>
+          <Typography
+            variant="h5"
+            component="h1"
+            sx={{ mb: 3, textAlign: "center" }}
           >
-            {formik.status}
-          </pre>
-        )}
+            Recuperar E-mail
+          </Typography>
 
-        <form onSubmit={formik.handleSubmit}>
-          <TextField
-            fullWidth
-            id="cpf"
-            name="cpf"
-            label="CPF"
-            margin="normal"
-            value={formik.values.cpf}
-            onChange={formik.handleChange}
-            error={formik.touched.cpf && Boolean(formik.errors.cpf)}
-            helperText={formik.touched.cpf && formik.errors.cpf}
-          />
-
-          <TextField
-            fullWidth
-            id="phone"
-            name="phone"
-            label="Telefone"
-            margin="normal"
-            value={formik.values.phone}
-            onChange={formik.handleChange}
-            error={formik.touched.phone && Boolean(formik.errors.phone)}
-            helperText={formik.touched.phone && formik.errors.phone}
-          />
-
-          <Button fullWidth variant="contained" type="submit" sx={{ mt: 3 }}>
-            Buscar
-          </Button>
-
-          {recoveredEmail && (
-            <Box
-              sx={{
-                mt: 3,
+          {formik.status && (
+            <pre
+              style={{
+                color: "#d32f2f",
+                fontSize: "0.75rem",
+                fontFamily: "Roboto, Helvetica, Arial, sans-serif",
                 textAlign: "center",
-                p: 2,
-                backgroundColor: "#e0f7fa",
-                borderRadius: 1,
+                marginBottom: "10px",
               }}
             >
-              <Typography variant="h6">E-mail Recuperado:</Typography>
-              <Typography variant="body1">{recoveredEmail}</Typography>
-
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() => navigate("/login")}
-                sx={{ mt: 3 }}
-              >
-                Fazer Login
-              </Button>
-            </Box>
+              {formik.status}
+            </pre>
           )}
-        </form>
-      </Paper>
+
+          <form onSubmit={formik.handleSubmit}>
+            <TextField
+              fullWidth
+              id="cpf"
+              name="cpf"
+              label="CPF"
+              margin="normal"
+              value={formik.values.cpf}
+              onChange={formik.handleChange}
+              error={formik.touched.cpf && Boolean(formik.errors.cpf)}
+              helperText={formik.touched.cpf && formik.errors.cpf}
+            />
+
+            <TextField
+              fullWidth
+              id="phone"
+              name="phone"
+              label="Telefone"
+              margin="normal"
+              value={formik.values.phone}
+              onChange={formik.handleChange}
+              error={formik.touched.phone && Boolean(formik.errors.phone)}
+              helperText={formik.touched.phone && formik.errors.phone}
+            />
+
+            <Button fullWidth variant="contained" type="submit" sx={{ mt: 3 }}>
+              Buscar
+            </Button>
+
+            {recoveredEmail && (
+              <Box
+                sx={{
+                  mt: 3,
+                  textAlign: "center",
+                  p: 2,
+                  backgroundColor: "#e0f7fa",
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="h6">E-mail Recuperado:</Typography>
+                <Typography variant="body1">{recoveredEmail}</Typography>
+
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() => navigate("/login")}
+                  sx={{ mt: 3 }}
+                >
+                  Fazer Login
+                </Button>
+              </Box>
+            )}
+          </form>
+        </Paper>
+      </Box>
+      <Footer />
     </Box>
   );
 };

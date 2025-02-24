@@ -44,7 +44,6 @@ export const customerService = {
     await axios.delete(`${API_URL}/customers/${id}`);
   },
 
-  // Address related endpoints
   getCustomerAddressById: async (
     customerId: number,
     addressId: number

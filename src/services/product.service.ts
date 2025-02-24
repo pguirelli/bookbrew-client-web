@@ -38,7 +38,6 @@ export const productService = {
     await axios.delete(`${API_URL}/brands/${id}`);
   },
 
-  // Category endpoints
   getAllCategories: async (): Promise<CategoryProd[]> => {
     const response = await axios.get(`${API_URL}/categories`);
     return response.data;
@@ -74,7 +73,6 @@ export const productService = {
 
     const currentDate = new Date();
 
-    // Filtra promoções válidas
     const validPromotions = promotions.filter((promotion) => {
       const startDate = new Date(promotion.startDate);
       const endDate = new Date(promotion.endDate);
@@ -83,7 +81,6 @@ export const productService = {
       );
     });
 
-    // Se houver promoções válidas, retorna a promoção com o maior desconto
     if (validPromotions.length > 0) {
       const maxDiscountPromotion = validPromotions.reduce((max, promotion) =>
         promotion.discountPercentage > max.discountPercentage ? promotion : max
@@ -91,18 +88,15 @@ export const productService = {
       return [maxDiscountPromotion];
     }
 
-    // Se não houver promoções válidas, retorna um array vazio
     return [];
   },
 
-  // Product endpoints
   getAllProducts: async (): Promise<
     (Product & { discountPercentage: number })[]
   > => {
     const response = await axios.get(`${API_URL}/products`);
     const products: Product[] = response.data;
 
-    // Para cada produto, busque as promoções e inclua o percentual de desconto
     const productsWithDiscounts = await Promise.all(
       products.map(async (product) => {
         const promotions = await productService.getProductPromotions(
@@ -129,7 +123,6 @@ export const productService = {
     const response = await axios.get(`${API_URL}/products/${id}`);
     const product: Product = response.data;
 
-    // Busque as promoções e inclua o percentual de desconto
     const promotions = await productService.getProductPromotions(product.id!);
 
     const discountPercentage =
@@ -152,7 +145,6 @@ export const productService = {
     await axios.delete(`${API_URL}/products/${id}`);
   },
 
-  // Product Image endpoint
   uploadProductImage: async (
     productId: number,
     imageFile: File,
